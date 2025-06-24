@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-// import leaflet
+// Using @nuxtjs/leaflet module - components are auto-imported
 import { ref } from "vue";
-import { LMap, LTileLayer, LMarker, LPopup } from "@vue-leaflet/vue-leaflet";
-import "leaflet/dist/leaflet.css";
 
 interface Marker {
     coordinates: [number, number];
@@ -23,7 +21,7 @@ const marker = ref<Marker>({
         <l-map :zoom="zoom" :center="coordinates" class="rounded-3" style="height: 500px" :use-global-leaflet="false">
             <l-tile-layer :url="mapLayer"></l-tile-layer>
             <l-marker :lat-lng="marker.coordinates">
-                <l-popup>{{ marker.popup }}</l-popup>
+                <l-popup v-html="marker.popup"></l-popup>
             </l-marker>
         </l-map>
     </section>

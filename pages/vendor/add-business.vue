@@ -18,9 +18,7 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
 
 // Create component
 // const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginImagePreview)
-// import leaflet
-import { LMap, LTileLayer } from "@vue-leaflet/vue-leaflet";
-import "leaflet/dist/leaflet.css";
+// Using @nuxtjs/leaflet module - components are auto-imported
 
 // Create component
 const FilePond = vueFilePond(
@@ -122,7 +120,7 @@ definePageMeta({
                                     <h2 class="h4">Awards</h2>
                                     <ul class="list-unstyled">
                                         <li class="d-flex align-items-center mb-2"><img class="flex-shrink-0 me-2" src="@/assets/img/city-guide/single/awards/01.jpg" width="40" alt="Award logo">
-                                            <div>2020 Traveler’s Choice</div>
+                                            <div>2020 Traveler's Choice</div>
                                         </li>
                                         <li class="d-flex align-items-center mb-2"><img class="flex-shrink-0 me-2" src="@/assets/img/city-guide/single/awards/02.jpg" width="40" alt="Award logo">
                                             <div>TUI Top Quality 2020</div>
