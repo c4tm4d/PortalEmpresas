@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  compatibilityDate: '2025-06-23',
   app: {
     head: {
       htmlAttrs: { dir: 'ltr', lang: 'en', class: 'scroll-smooth' },
@@ -23,5 +24,15 @@ export default defineNuxtConfig({
   ],
   plugins: [
     { src: "~/plugins/bootstrap.client.ts", mode: "client" },
-  ]
+  ],
+  nitro: {
+    preset: "cloudflare_module",
+
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true
+    }
+  },
+
+  modules: ["nitro-cloudflare-dev"]
 })
