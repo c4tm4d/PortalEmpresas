@@ -9,7 +9,7 @@
     "preview": "pnpm run build && wrangler dev",
     "postinstall": "nuxt prepare",
     "deploy": "pnpm run build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types && nuxt generate"
   },
   "dependencies": {
     "@nuxtjs/leaflet": "^1.2.6",
