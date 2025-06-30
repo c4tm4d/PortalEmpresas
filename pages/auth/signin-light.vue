@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -8,9 +8,73 @@ const goBack = () => {
   router.go(-1); // or router.back()
 }
 
+// Form data
+const form = reactive({
+  email: '',
+  password: ''
+})
+
+// Form validation errors
+const errors = reactive({
+  email: '',
+  password: ''
+})
+
+// Loading and error states
+const isLoading = ref(false)
+const errorMessage = ref('')
+
 const passwordType = ref('password');
 const togglePassword = () => {
     passwordType.value = passwordType.value === 'password' ? 'text' : 'password';    
+}
+
+// Validation function
+const validateForm = () => {
+  errors.email = ''
+  errors.password = ''
+  
+  if (!form.email) {
+    errors.email = 'Email is required'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = 'Please enter a valid email'
+  }
+  
+  if (!form.password) {
+    errors.password = 'Password is required'
+  } else if (form.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
+  }
+  
+  return !errors.email && !errors.password
+}
+
+// Handle form submission
+const handleSubmit = async (e: Event) => {
+  e.preventDefault()
+  errorMessage.value = ''
+  
+  if (!validateForm()) return
+  
+  isLoading.value = true
+  
+  try {
+    const response = await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: {
+        email: form.email,
+        password: form.password
+      }
+    })
+    
+    // Redirect to home page
+    router.push('/')
+    
+  } catch (error: any) {
+    errorMessage.value = error.data?.message || 'Sign in failed. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 definePageMeta({
@@ -41,10 +105,27 @@ definePageMeta({
                         <div class="px-3">Or</div>
                         <hr class="w-100" />
                     </div>
-                    <form class="needs-validation" novalidate>
+                    
+                    <!-- Error Message -->
+                    <div v-if="errorMessage" class="alert alert-danger mb-3" role="alert">
+                        {{ errorMessage }}
+                    </div>
+                    
+                    <form @submit="handleSubmit" class="needs-validation" novalidate>
                         <div class="mb-4">
                             <label class="form-label mb-2" for="signin-email">Email address</label>
-                            <input class="form-control" type="email" id="signin-email" placeholder="Enter your email" required />
+                            <input 
+                                class="form-control" 
+                                :class="{ 'is-invalid': errors.email }"
+                                type="email" 
+                                id="signin-email" 
+                                v-model="form.email"
+                                placeholder="Enter your email" 
+                                required 
+                            />
+                            <div v-if="errors.email" class="invalid-feedback">
+                                {{ errors.email }}
+                            </div>
                         </div>
                         <div class="mb-4">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -52,14 +133,33 @@ definePageMeta({
                                 <a class="fs-sm" href="javascript:void(0);">Forgot password?</a>
                             </div>
                             <div class="password-toggle">
-                                <input class="form-control" :type="passwordType" id="signin-password" placeholder="Enter password" required autocomplete="off" />
+                                <input 
+                                    class="form-control" 
+                                    :class="{ 'is-invalid': errors.password }"
+                                    :type="passwordType" 
+                                    id="signin-password" 
+                                    v-model="form.password"
+                                    placeholder="Enter password" 
+                                    required 
+                                    autocomplete="off" 
+                                />
                                 <label class="password-toggle-btn" aria-label="Show/hide password">
                                     <input class="password-toggle-check" @click="togglePassword()" type="checkbox" />
                                     <span class="password-toggle-indicator"></span>
                                 </label>
                             </div>
+                            <div v-if="errors.password" class="invalid-feedback">
+                                {{ errors.password }}
+                            </div>
                         </div>
-                        <button class="btn btn-primary btn-lg w-100" type="submit">Sign in</button>
+                        <button 
+                            class="btn btn-primary btn-lg w-100" 
+                            type="submit"
+                            :disabled="isLoading"
+                        >
+                            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            {{ isLoading ? 'Signing in...' : 'Sign in' }}
+                        </button>
                     </form>
                 </div>
             </div>

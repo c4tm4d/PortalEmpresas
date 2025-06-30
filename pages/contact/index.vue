@@ -9,14 +9,14 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Contact us',
+                title: 'Contactos',
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Contact Us',
+    title: 'Contactos',
 });
 </script>
 <template>

@@ -6,7 +6,7 @@ const route = useRoute()
 defineProps({
   title: {
     type: String,
-    default: 'Finder'
+    default: 'Portal Empresas'
   }
 })
 </script>
@@ -15,8 +15,8 @@ defineProps({
   <NuxtLayout>
 
     <Head>
-      <Title>Finder | City Guide | {{ route.meta.title }}</Title>
-      <link rel='icon' type='image/png' href='/favicon.png'>
+      <Title>Portal Empresas | Guia de Empresas | {{ route.meta.title }}</Title>
+      <link rel='icon' type='image/x-icon' href='/favicon.ico'>
     </Head>
 
     <NuxtPage />

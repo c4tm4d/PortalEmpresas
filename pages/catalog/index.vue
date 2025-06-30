@@ -10,14 +10,14 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Find accommodation',
+                title: 'Encontrar Empresas',
             },
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Find Accommodation',
+    title: 'Encontrar Empresas',
 });
 
 </script>
@@ -40,7 +40,7 @@ definePageMeta({
 
                 <!-- Title-->
                 <div class="d-sm-flex align-items-center justify-content-between pb-3 pb-sm-4">
-                    <h1 class="h2 mb-sm-0">Find accommodation</h1>
+                    <h1 class="h2 mb-sm-0">Encontrar Empresas</h1>
                     <a class="d-inline-block fw-bold text-decoration-none py-1" href="javascript:void(0);" data-bs-toggle-class="invisible" data-bs-target="#map"><i class="fi-map me-2"></i>Map view</a>
                 </div>
                 <!-- Sorting-->

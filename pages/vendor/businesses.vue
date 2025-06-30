@@ -1,10 +1,44 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
+import { useRouter } from 'vue-router'
+
+// Import Vue FilePond
+import vueFilePond from 'vue-filepond'
+
+// Import FilePond styles
+import 'filepond/dist/filepond.min.css'
+
+// Import image preview plugin styles
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'
+
+// Import image preview and file type validation plugins
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
+
+// Create component
+// const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginImagePreview)
+// Using @nuxtjs/leaflet module - components are auto-imported
+
+// Create component
+const FilePond = vueFilePond(
+    FilePondPluginFileValidateType,
+    FilePondPluginImagePreview
+);
+
+const files = ref([]);
+const logoFiles = ref([]);
+const zoom = ref<number>(13);
+
+// Manual file management
+const uploadedFiles = ref<any[]>([]);
+const uploadedLogoFiles = ref<any[]>([]);
+
+const router = useRouter()
 
 onMounted(() => {
     document.body.classList.add('bg-secondary')
+    fetchBusinesses()
 })
 
 const breadcrumbData = ref([
@@ -13,15 +47,44 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'My Businesses'
+                title: 'Os Meus Negócios'
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Business',
+    title: 'Os Meus Negócios',
 });
+
+const businesses = ref<any[]>([])
+const isLoading = ref(true)
+const loadError = ref('')
+
+const fetchBusinesses = async () => {
+    try {
+        isLoading.value = true
+        businesses.value = await $fetch('/api/businesses')
+    } catch (error: any) {
+        loadError.value = error.data?.message || 'Failed to load businesses.'
+    } finally {
+        isLoading.value = false
+    }
+}
+
+const handleEdit = (id: number) => {
+    router.push(`/vendor/edit-business/${id}`)
+}
+
+const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this business?')) return
+    try {
+        await $fetch(`/api/businesses/${id}`, { method: 'DELETE' })
+        businesses.value = businesses.value.filter((b: any) => b.id !== id)
+    } catch (error: any) {
+        alert(error.data?.message || 'Failed to delete business.')
+    }
+}
 </script>
 
 <template>
@@ -35,290 +98,76 @@ definePageMeta({
             <h1 class="h2 mb-sm-0">My businesses</h1>
             <div class="d-flex align-items-center ms-sm-4">
                 <label class="fs-sm me-2 pe-1 text-nowrap" for="sortby"><i class="fi-arrows-sort text-muted mt-n1 me-2"></i>Sort by:</label>
-                <select class="form-select form-select-sm" id="sortby">
+                <select class="form-select form-select-sm" id="sortby" disabled>
                     <option>Newest</option>
-                    <option>Oldest</option>
-                    <option>Popularity</option>
-                    <option>High rating</option>
-                    <option>Low rating</option>
                 </select>
             </div>
         </div>
 
         <div class="card p-sm-4 border-0 shadow-sm">
             <div class="card-body">
-                <div class="row">
-                    <!-- Sidebar-->
-                    <aside class="col-lg-3 col-md-4 mb-lg-0 mb-4 pb-2 pe-xl-5">
-                        <ul class="nav flex-column mb-4 pb-lg-3">
-                            <li class="nav-item">
-                                <a class="nav-link py-1 px-0 fs-sm fw-normal" href="javascript:void(0);">
-                                    <i class="fi-bed mt-n1 me-2 fs-base align-middle opacity-70"></i>Accommodation<span class="float-end text-muted">(4)</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link py-1 px-0 fs-sm fw-normal" href="javascript:void(0);">
-                                    <i class="fi-cafe mt-n1 me-2 fs-base align-middle opacity-70"></i>Food &amp;
-                                    Drink<span class="float-end text-muted">(1)</span>
-                                </a>
-                            </li>
-                        </ul>
+                <div v-if="isLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading businesses...</p>
+                </div>
+                <div v-else-if="loadError" class="alert alert-danger" role="alert">
+                    <h4 class="alert-heading">Error Loading Businesses</h4>
+                    <p>{{ loadError }}</p>
+                </div>
+                <div v-else>
+                    <div v-if="businesses.length === 0" class="text-center py-5">
+                        <p>No businesses found.</p>
                         <nuxt-link class="btn btn-primary rounded-pill" to="/vendor/add-business">
                             <i class="fi-plus me-2"></i>Add new business
                         </nuxt-link>
-                    </aside>
-                    <!-- Grid-->
-                    <div class="col-lg-9 col-md-8">
-                        <div class="row row-cols-md-2 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-3 g-xl-4">
-                            <!-- Item-->
-                            <div class="col pb-2">
-                                <div class="position-relative">
-                                    <div class="position-relative mb-3">
-                                        <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
-                                            <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" id="contextMenu1" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu my-1" aria-labelledby="contextMenu1">
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-edit opacity-60 me-2"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-flame opacity-60 me-2"></i>Promote
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-power opacity-60 me-2"></i>Deactivate
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-trash opacity-60 me-2"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <img class="rounded-3" src="@/assets/img/city-guide/business/01.jpg" alt="Image" />
+                    </div>
+                    <div v-else class="row row-cols-md-2 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-3 g-xl-4">
+                        <div v-for="business in businesses" :key="business.id" class="col pb-2">
+                            <div class="position-relative">
+                                <div class="position-relative mb-3">
+                                    <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
+                                        <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" :id="`contextMenu${business.id}`" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fi-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu my-1" :aria-labelledby="`contextMenu${business.id}`">
+                                            <li>
+                                                <button class="dropdown-item" type="button" @click="handleEdit(business.id)">
+                                                    <i class="fi-edit opacity-60 me-2"></i>Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <nuxt-link class="dropdown-item" :to="`/vendor/business-promotion?business=${business.id}`">
+                                                    <i class="fi-flame opacity-60 me-2"></i>Promote
+                                                </nuxt-link>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item" type="button" @click="handleDelete(business.id)">
+                                                    <i class="fi-trash opacity-60 me-2"></i>Delete
+                                                </button>
+                                            </li>
+                                        </ul>
                                     </div>
-                                    <h3 class="mb-2 fs-lg">
-                                        <nuxt-link class="nav-link stretched-link" to="/catalog/single">Berlin Business Hotel</nuxt-link>
-                                    </h3>
-                                    <ul class="list-inline mb-0 fs-xs">
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(48)</span>
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.4 km
-                                            from center
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <!-- Item-->
-                            <div class="col pb-2">
-                                <div class="position-relative">
-                                    <div class="position-relative mb-3">
-                                        <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
-                                            <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" id="contextMenu2" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu my-1" aria-labelledby="contextMenu2">
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-edit opacity-60 me-2"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-flame opacity-60 me-2"></i>Promote
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-power opacity-60 me-2"></i>Deactivate
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-trash opacity-60 me-2"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <img class="rounded-3" src="@/assets/img/city-guide/business/02.jpg" alt="Article img" />
+                                    <img v-if="business.logo" class="rounded-3" :src="business.logo" alt="Logo" style="object-fit:cover; width:100%; height:180px;" />
+                                    <div v-else class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="height:180px;">
+                                        <i class="fi-image text-muted fs-1"></i>
                                     </div>
-                                    <h3 class="mb-2 fs-lg">
-                                        <nuxt-link class="nav-link stretched-link" to="/catalog/single">Big Tree Cottage</nuxt-link>
-                                    </h3>
-                                    <ul class="list-inline mb-0 fs-xs">
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>4.8</b><span class="text-muted">&nbsp;(24)</span>
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$$
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>0.5 km
-                                            from center
-                                        </li>
-                                    </ul>
                                 </div>
-                            </div>
-                            <!-- Item-->
-                            <div class="col pb-2">
-                                <div class="position-relative">
-                                    <div class="position-relative mb-3">
-                                        <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
-                                            <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" id="contextMenu3" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu my-1" aria-labelledby="contextMenu3">
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-edit opacity-60 me-2"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-flame opacity-60 me-2"></i>Promote
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-power opacity-60 me-2"></i>Deactivate
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-trash opacity-60 me-2"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <img class="rounded-3" src="@/assets/img/city-guide/business/03.jpg" alt="Image" />
-                                    </div>
-                                    <h3 class="mb-2 fs-lg">
-                                        <nuxt-link class="nav-link stretched-link" to="/catalog/single">Leisure Inn</nuxt-link>
-                                    </h3>
-                                    <ul class="list-inline mb-0 fs-xs">
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>4.9</b><span class="text-muted">&nbsp;(43)</span>
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$$
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.8 km
-                                            from center
-                                        </li>
-                                    </ul>
+                                <h3 class="mb-2 fs-lg">
+                                    <nuxt-link class="nav-link stretched-link" :to="`/catalog/single?id=${business.id}`">{{ business.name }}</nuxt-link>
+                                </h3>
+                                <div class="mb-1 text-muted small">
+                                    <span v-if="business.category">{{ business.category.name }}</span>
                                 </div>
-                            </div>
-                            <!-- Item-->
-                            <div class="col pb-2">
-                                <div class="position-relative">
-                                    <div class="position-relative mb-3">
-                                        <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
-                                            <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" id="contextMenu4" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu my-1" aria-labelledby="contextMenu4">
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-edit opacity-60 me-2"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-flame opacity-60 me-2"></i>Promote
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-power opacity-60 me-2"></i>Deactivate
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-trash opacity-60 me-2"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <img class="rounded-3" src="@/assets/img/city-guide/business/04.jpg" alt="Image" />
-                                    </div>
-                                    <h3 class="mb-2 fs-lg">
-                                        <nuxt-link class="nav-link stretched-link" to="/catalog/single">Central Cafe</nuxt-link>
-                                    </h3>
-                                    <ul class="list-inline mb-0 fs-xs">
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(40)</span>
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.7 km
-                                            from center
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <!-- Item-->
-                            <div class="col pb-sm-2">
-                                <div class="position-relative">
-                                    <div class="position-relative mb-3">
-                                        <div class="dropdown position-absolute zindex-5 top-0 end-0 mt-3 me-3">
-                                            <button class="btn btn-icon btn-light btn-xs rounded-circle shadow-sm" type="button" id="contextMenu5" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu my-1" aria-labelledby="contextMenu5">
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-edit opacity-60 me-2"></i>Edit
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-flame opacity-60 me-2"></i>Promote
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-power opacity-60 me-2"></i>Deactivate
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item" type="button">
-                                                        <i class="fi-trash opacity-60 me-2"></i>Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <img class="rounded-3" src="@/assets/img/city-guide/business/05.jpg" alt="Image" />
-                                    </div>
-                                    <h3 class="mb-2 fs-lg">
-                                        <nuxt-link class="nav-link stretched-link" to="/catalog/single">Grand Resort &amp; Spa</nuxt-link>
-                                    </h3>
-                                    <ul class="list-inline mb-0 fs-xs">
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>4.9</b><span class="text-muted">&nbsp;(43)</span>
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$$
-                                        </li>
-                                        <li class="list-inline-item pe-1">
-                                            <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.8 km
-                                            from center
-                                        </li>
-                                    </ul>
-                                </div>
+                                <ul class="list-inline mb-0 fs-xs">
+                                    <li class="list-inline-item pe-1">
+                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.city }}
+                                    </li>
+                                    <li class="list-inline-item pe-1">
+                                        <i class="fi-phone mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.phone }}
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>

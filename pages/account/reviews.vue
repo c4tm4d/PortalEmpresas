@@ -10,18 +10,19 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Account',
+                title: 'Conta',
                 link: '/account/info'
             },
             {
-                title: 'Reviews'
+                title: 'Avaliações'
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Account - Reviews',
+    title: 'Avaliações',
+    middleware: 'auth'
 });
 </script>
 <template>

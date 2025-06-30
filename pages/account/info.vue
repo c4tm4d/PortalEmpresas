@@ -6,7 +6,9 @@ import Nav from './common/nav.vue';
 
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
+
 const date = ref(null);
+const { user } = useAuth();
 
 const breadcrumbData = ref([
     {
@@ -14,18 +16,19 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Account',
+                title: 'Conta',
                 link: '/account/info'
             },
             {
-                title: 'Personal Info',
+                title: 'Informação Pessoal',
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Account - Personal Info',
+    title: 'Informação Pessoal',
+    middleware: 'auth'
 });
 </script>
 <template>
@@ -50,14 +53,14 @@ definePageMeta({
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="pe-2">
                             <label class="form-label fw-bold">Full name</label>
-                            <div id="name-value">Annette Black</div>
+                            <div id="name-value">{{ user?.name || 'Not specified' }}</div>
                         </div>
                         <div data-bs-toggle="tooltip" data-bs-title="Edit">
                             <a class="nav-link py-0" data-bs-target="#name-collapse" data-bs-toggle="collapse"><i class="fi-edit"></i></a>
                         </div>
                     </div>
                     <div class="collapse" id="name-collapse" data-bs-parent="#personal-info">
-                        <input class="form-control mt-3" type="text" data-bs-binded-element="#name-value" data-bs-unset-value="Not specified" value="Annette Black">
+                        <input class="form-control mt-3" type="text" data-bs-binded-element="#name-value" data-bs-unset-value="Not specified" :value="user?.name || ''">
                     </div>
                 </div>
                 <!-- Gender-->
@@ -98,12 +101,12 @@ definePageMeta({
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="pe-2">
                             <label class="form-label fw-bold">Email</label>
-                            <div id="email-value">annette_black@email.com</div>
+                            <div id="email-value">{{ user?.email || 'Not specified' }}</div>
                         </div>
                         <div data-bs-toggle="tooltip" data-bs-title="Edit"><a class="nav-link py-0" data-bs-target="#email-collapse" data-bs-toggle="collapse"><i class="fi-edit"></i></a></div>
                     </div>
                     <div class="collapse" id="email-collapse" data-bs-parent="#personal-info">
-                        <input class="form-control mt-3" type="email" data-bs-binded-element="#email-value" data-bs-unset-value="Not specified" value="annette_black@email.com">
+                        <input class="form-control mt-3" type="email" data-bs-binded-element="#email-value" data-bs-unset-value="Not specified" :value="user?.email || ''">
                     </div>
                 </div>
                 <!-- Phone number-->
@@ -111,12 +114,12 @@ definePageMeta({
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="pe-2">
                             <label class="form-label fw-bold">Phone number</label>
-                            <div id="phone-value">(302) 555-0107</div>
+                            <div id="phone-value">Not specified</div>
                         </div>
                         <div data-bs-toggle="tooltip" data-bs-title="Edit"><a class="nav-link py-0" data-bs-target="#phone-collapse" data-bs-toggle="collapse"><i class="fi-edit"></i></a></div>
                     </div>
                     <div class="collapse" id="phone-collapse" data-bs-parent="#personal-info">
-                        <input class="form-control mt-3" type="text" data-bs-binded-element="#phone-value" data-bs-unset-value="Not specified" value="(302) 555-0107">
+                        <input class="form-control mt-3" type="text" data-bs-binded-element="#phone-value" data-bs-unset-value="Not specified" placeholder="Enter phone number">
                     </div>
                 </div>
                 <!-- Address-->

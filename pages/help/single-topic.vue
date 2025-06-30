@@ -9,18 +9,18 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Help Center',
+                title: 'Centro de Ajuda',
                 link: '/help/help-center'
             },
             {
-                title: 'Privacy & security'
+                title: 'Tópico Individual'
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Single Topic',
+    title: 'Tópico Individual',
 });
 </script>
 <template>

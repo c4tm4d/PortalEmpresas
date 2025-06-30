@@ -1,38 +1,81 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-  compatibilityDate: '2025-06-23',
-  app: {
-    head: {
-      htmlAttrs: { dir: 'ltr', lang: 'en', class: 'scroll-smooth' },
-      meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Finder | City Guide' },
-        { name: "keywords", content: "bootstrap, business, directory, listings, e-commerce, car dealer, city guide, real estate, job board, user account, multipurpose, ui kit, html5, css3, javascript, gallery, slider, touch" },
-        { name: "author", content: "SRBThemes" }
-      ],
-      link: [
-        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
-        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
-        { rel: 'apple-touch-icon', type: 'image/png', sizes: '180x180', href: '/apple-touch-icon.png' },
-      ]
+  devtools: {
+    enabled: true,
 
+    timeline: {
+      enabled: true,
     },
   },
-  css: [
-    "~/assets/scss/theme.scss",
-  ],
-  plugins: [
-    { src: "~/plugins/bootstrap.client.ts", mode: "client" },
-  ],
+  compatibilityDate: "2025-06-23",
+  debug: true,
+  app: {
+    head: {
+      htmlAttrs: { dir: "ltr", lang: "en", class: "scroll-smooth" },
+      meta: [
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "description", content: "Portal Empresas | Guia de Empresas" },
+        {
+          name: "keywords",
+          content:
+            "Um Portal de Empresas para Portugal, Guia de empresas e comercio local",
+        },
+        { name: "author", content: "Portal Empresas" },
+      ],
+      link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "32x32",
+          href: "/favicon-32x32.png",
+        },
+        {
+          rel: "icon",
+          type: "image/png",
+          sizes: "16x16",
+          href: "/favicon-16x16.png",
+        },
+        {
+          rel: "apple-touch-icon",
+          type: "image/png",
+          sizes: "180x180",
+          href: "/apple-touch-icon.png",
+        },
+      ],
+    },
+  },
+  css: ["~/assets/scss/theme.scss"],
+  plugins: [{ src: "~/plugins/bootstrap.client.ts", mode: "client" }],
+
+  // https://hub.nuxt.com/docs/getting-started/installation#options
+  hub: {
+    database: true,
+    blob: true,
+  },
+  
   nitro: {
     preset: "cloudflare_module",
-
+    experimental: {
+      tasks: true,
+      openAPI: true,
+    },
     cloudflare: {
       deployConfig: true,
-      nodeCompat: true
-    }
+      nodeCompat: true,
+    },
   },
 
-  modules: ["nitro-cloudflare-dev", "@nuxtjs/leaflet"]
-})
+  // Env variables - https://nuxt.com/docs/getting-started/configuration#environment-variables-and-private-tokens
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    },
+  },
+
+  modules: [
+    "nitro-cloudflare-dev",
+    "@nuxtjs/leaflet",
+    "@nuxthub/core",
+    "nuxt-auth-utils",
+  ],
+});

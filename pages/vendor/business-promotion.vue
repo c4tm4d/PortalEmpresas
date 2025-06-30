@@ -16,18 +16,18 @@ const breadcrumbData = ref([
         link: '/',
         subitems: [
             {
-                title: 'Add Business',
+                title: 'Adicionar Negócio',
                 link: '/vendor/add-business'
             },
             {
-                title: 'Promotion page'
+                title: 'Promoção de Negócio'
             }
         ]
     }
 ])
 
 definePageMeta({
-    title: 'Business Promotion',
+    title: 'Promoção de Negócio',
 });
 </script>
 <template>

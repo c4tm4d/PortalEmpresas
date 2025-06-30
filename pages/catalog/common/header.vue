@@ -51,8 +51,8 @@ const breadcrumbData = ref([
                 </div>
             </div>
         </div>
-        <!-- Nav pills-->
-        <ul class="nav nav-pills border-bottom pb-3 mb-4">
+        <!-- Nav pills hidden-->
+        <!-- <ul class="nav nav-pills border-bottom pb-3 mb-4">
             <li class="nav-item">
                 <nuxt-link class="nav-link d-flex align-items-center" :class="{ 'active' : isActive === 'single'}" to="/catalog/single"><i class="fi-image me-2"></i>Gallery</nuxt-link>
             </li>
@@ -62,6 +62,6 @@ const breadcrumbData = ref([
             <li class="nav-item">
                 <nuxt-link class="nav-link d-flex align-items-center" :class="{ 'active' : isActive === 'single-reviews'}" to="/catalog/single-review"><i class="fi-edit me-2"></i>Reviews</nuxt-link>
             </li>
-        </ul>
+        </ul> -->
     </section>
 </template>

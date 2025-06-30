@@ -1,9 +1,21 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 defineProps({
     isActive: String
 })
+
+const handleLogout = async () => {
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    router.push('/')
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
 
 onMounted(() => {
     document.body.classList.add('bg-secondary');
@@ -41,9 +53,9 @@ onUnmounted(() => {
                     </nuxt-link>
                 </li>
                 <li class="nav-item d-md-none">
-                    <nuxt-link class="nav-link" :class="{ 'active' : isActive === 'signout'}" to="/auth/signin-light">
+                    <a class="nav-link" href="#" @click.prevent="handleLogout">
                         <i class="fi-logout mt-n1 me-2 fs-base"></i>Sign Out
-                    </nuxt-link>
+                    </a>
                 </li>
             </ul>
         </div>
