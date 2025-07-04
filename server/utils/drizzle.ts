@@ -7,7 +7,16 @@ export { sql, eq, and, or } from 'drizzle-orm'
 export const tables = schema
 
 export function useDrizzle() {
-  return drizzle(hubDatabase() as D1Database, { schema })
+  try {
+    const db = hubDatabase() as D1Database
+    if (!db) {
+      throw new Error('Database connection not available')
+    }
+    return drizzle(db, { schema })
+  } catch (error) {
+    console.error('Database connection error:', error)
+    throw error
+  }
 }
 
 export type User = typeof schema.users.$inferSelect

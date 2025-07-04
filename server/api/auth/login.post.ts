@@ -12,9 +12,23 @@ export default defineEventHandler(async (event) => {
     }))
 
     console.log('Login attempt for:', email) // Debug log
+    console.log('Password length:', password.length) // Debug log
+
+    // Test database connection
+    let db
+    try {
+      db = useDrizzle()
+      console.log('Database connection successful') // Debug log
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError) // Debug log
+      throw createError({
+        statusCode: 500,
+        message: 'Database connection error'
+      })
+    }
 
     // Find user by email
-    const user = await useDrizzle()
+    const user = await db
       .select()
       .from(tables.users)
       .where(eq(tables.users.email, email))
@@ -25,6 +39,17 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 401,
         message: 'Invalid email or password'
+      })
+    }
+
+    console.log('User found, stored password length:', user.password.length) // Debug log
+
+    // Check if password field is empty or null
+    if (!user.password || user.password.trim() === '') {
+      console.log('Empty password field for user:', email) // Debug log
+      throw createError({
+        statusCode: 500,
+        message: 'User account has invalid password'
       })
     }
 
@@ -41,14 +66,27 @@ export default defineEventHandler(async (event) => {
     }
 
     // Set session
-    await setUserSession(event, {
+    const sessionData = {
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
         avatar: user.avatar
       }
-    })
+    }
+    
+    console.log('Setting session with data:', JSON.stringify(sessionData)) // Debug log
+    
+    try {
+      await setUserSession(event, sessionData)
+      console.log('Session set successfully') // Debug log
+    } catch (sessionError) {
+      console.error('Error setting session:', sessionError) // Debug log
+      throw createError({
+        statusCode: 500,
+        message: 'Failed to create session'
+      })
+    }
 
     console.log('Login successful for:', email) // Debug log
 
@@ -65,6 +103,9 @@ export default defineEventHandler(async (event) => {
   }
   catch (error) {
     console.error('Login error:', error) // Debug log
+    if (error instanceof Error) {
+      console.error('Error stack:', error.stack) // Debug log
+    }
     throw error
   }
 })
