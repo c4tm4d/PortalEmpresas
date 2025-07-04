@@ -68,7 +68,7 @@ export default defineNuxtConfig({
   // Env variables - https://nuxt.com/docs/getting-started/configuration#environment-variables-and-private-tokens
   runtimeConfig: {
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://portal-empresas.pt",
     },
     // Private keys (only available on server-side)
     auth: {
