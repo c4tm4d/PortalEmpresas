@@ -1,6 +1,7 @@
 import { useValidatedBody, z } from 'h3-zod'
 import { eq } from 'drizzle-orm'
 import { verify } from '../../utils/password'
+import { useDrizzle, tables } from '../../utils/drizzle'
 
 export default defineEventHandler(async (event) => {
   try {

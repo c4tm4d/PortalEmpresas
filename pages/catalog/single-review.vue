@@ -3,16 +3,55 @@ import Header from './common/header.vue'
 import RecentlyViewed from './common/recently-view.vue'
 
 definePageMeta({
-    title: 'Single Place - Reviews',
+    title: 'Business Reviews',
 });
+
+// Get business ID from query parameter
+const route = useRoute();
+const businessId = route.query.id;
+
+// Fetch business data
+const { data: business, pending, error } = await useFetch(`/api/businesses/public/${businessId}`);
+
+// Handle case when business is not found
+if (!business.value && !pending.value) {
+    throw createError({
+        statusCode: 404,
+        message: 'Business not found'
+    });
+}
+
+// Set dynamic page title
+useHead(() => ({
+    title: business.value?.name ? `${business.value.name} - Reviews` : 'Business Reviews'
+}));
 </script>
 
 <template>
     <!-- Page header-->
-    <Header isActive="single-reviews" />
+    <Header :title="business?.name" :subtitle="business?.category?.name" isActive="single-reviews" />
+
+    <!-- Loading state -->
+    <div v-if="pending" class="container py-5">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading business details...</p>
+        </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="error" class="container py-5">
+        <div class="text-center">
+            <i class="fi-alert-circle display-4 text-danger mb-3"></i>
+            <h3>Error loading business</h3>
+            <p class="text-muted">Failed to load business details. Please try again.</p>
+        </div>
+    </div>
 
     <!-- Page content -->
-    <section class="container pb-5 mb-md-4">
+    <section v-else-if="business" class="container pb-5 mb-md-4">
         <div class="row">
             <!-- Left column-->
             <div class="col-md-7 mb-md-0 mb-4 pb-md-0 pb-2">
@@ -254,18 +293,15 @@ definePageMeta({
                     <div class="card-body">
                         <!-- Place info-->
                         <div class="d-flex align-items-start mb-3 pb-2 border-bottom">
-                            <img src="@/assets/img/city-guide/brands/hotel.svg" width="60" alt="Thumbnail" />
+                            <img :src="business.logo || '/placeholder.png'" width="60" alt="Business logo" />
                             <div class="ps-2 ms-1">
-                                <h3 class="h5 mb-2">Berlin Business Hotel</h3>
+                                <h3 class="h5 mb-2">{{ business.name }}</h3>
                                 <ul class="list-unstyled d-flex flex-wrap fs-sm">
                                     <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-star-filled mt-n1 me-1 text-warning align-middle opacity-70"></i><b>4.9 </b>(48)
+                                        <i class="fi-list mt-n1 me-1 text-primary align-middle opacity-70"></i>{{ business.category?.name }}
                                     </li>
                                     <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-wallet mt-n1 me-1 align-middle opacity-70"></i>$456
-                                    </li>
-                                    <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>1.4 km from center
+                                        <i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>{{ business.city }}, {{ business.district }}
                                     </li>
                                 </ul>
                             </div>

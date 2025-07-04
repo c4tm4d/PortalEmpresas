@@ -153,7 +153,7 @@ watch(() => route.fullPath,
               <li v-if="!user"><a class="dropdown-item" data-bs-target="#signup-modal" data-bs-toggle="modal">Registar</a></li>
             </ul>
           </li>
-          <li class="nav-item dropdown">
+          <li v-if="user" class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-expanded="false">Vendedor</a>
             <ul class="dropdown-menu">
               <li><nuxt-link class="dropdown-item" to="/vendor/add-business">Adicionar Negócio</nuxt-link></li>
@@ -161,7 +161,7 @@ watch(() => route.fullPath,
               <li><nuxt-link class="dropdown-item" to="/vendor/businesses">Os Meus Negócios</nuxt-link></li>
             </ul>
           </li>
-          <li class="nav-item dropdown">
+          <!-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="javascript:void(0);" role="button" data-bs-toggle="dropdown" aria-expanded="false">Sobre nós</a>
             <ul class="dropdown-menu">
               <li><nuxt-link class="dropdown-item" to="/about/">Sobre</nuxt-link></li>
@@ -185,7 +185,7 @@ watch(() => route.fullPath,
           </li>
           <li v-if="!isLoading && !user" class="nav-item d-lg-none">
             <a class="nav-link" data-bs-target="#signin-modal" data-bs-toggle="modal"><i class="fi-user me-2"></i>Entrar</a>
-          </li>
+          </li> -->
         </ul>
       </div>
     </div>

@@ -1,4 +1,63 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+// Fetch categories from API
+const { data: categories, pending } = await useFetch('/api/categories');
+
+// Search form state
+const searchQuery = ref('');
+const selectedCategory = ref('');
+
+// Function to get icon class based on category name
+const getCategoryIcon = (categoryName: string) => {
+    const iconMap: Record<string, string> = {
+        // Portuguese categories
+        'Alojamento': 'fi-bed',
+        'Comida e Bebida': 'fi-cafe',
+        'Restaurantes': 'fi-utensils',
+        'Compras': 'fi-shopping-bag',
+        'Arte e História': 'fi-museum',
+        'Entretenimento': 'fi-entertainment',
+        'Fitness e Desporto': 'fi-dumbell',
+        'Vida Noturna': 'fi-disco-ball',
+        'Medicina': 'fi-meds',
+        'Beleza': 'fi-makeup',
+        'Aluguer de Carros': 'fi-car',
+        'Serviços': 'fi-tools',
+        'Construção': 'fi-hammer',
+        'Transportes': 'fi-truck',
+        'Educação': 'fi-graduation-cap',
+        'Agricultura': 'fi-leaf',
+        'Indústria': 'fi-factory',
+        'Imobiliário': 'fi-home',
+        'Serviços Funerários': 'fi-cross',
+        'Veículos': 'fi-car',
+        'Saúde': 'fi-heartbeat',
+        'Comércio': 'fi-store',
+        'Lazer': 'fi-gamepad',
+        // English fallbacks
+        'Accommodation': 'fi-bed',
+        'Fitness & Sport': 'fi-dumbell',
+        'Food & Drink': 'fi-cafe',
+        'Night Life': 'fi-disco-ball',
+        'Shopping': 'fi-shopping-bag',
+        'Medicine': 'fi-meds',
+        'Art & History': 'fi-museum',
+        'Beauty': 'fi-makeup',
+        'Entertainment': 'fi-entertainment',
+        'Auto Service': 'fi-car'
+    };
+    return iconMap[categoryName] || 'fi-list';
+};
+
+// Handle search form submission
+const handleSearch = () => {
+    const query = new URLSearchParams();
+    if (searchQuery.value) query.append('search', searchQuery.value);
+    if (selectedCategory.value) query.append('category', selectedCategory.value);
+    
+    const searchUrl = `/catalog${query.toString() ? '?' + query.toString() : ''}`;
+    navigateTo(searchUrl);
+};
+</script>
 
 <template>
     <!-- Hero-->
@@ -25,62 +84,37 @@
                 </p>
                 <!-- Search form-->
                 <div class="me-lg-n5">
-                    <form class="form-group d-block d-md-flex position-relative rounded-md-pill me-lg-n5">
+                    <form class="form-group d-block d-md-flex position-relative rounded-md-pill me-lg-n5" @submit.prevent="handleSearch">
                         <div class="input-group input-group-lg border-end-md">
                             <span class="input-group-text text-muted rounded-pill ps-3"><i class="fi-search"></i></span>
-                            <input class="form-control" type="text" placeholder="O que estás à procura?" />
+                            <input class="form-control" type="text" placeholder="O que estás à procura?" v-model="searchQuery" />
                         </div>
                         <hr class="d-md-none my-2" />
                         <div class="d-sm-flex">
                             <div class="dropdown w-100 mb-sm-0 mb-3" data-bs-toggle="select">
                                 <button class="btn btn-link btn-lg dropdown-toggle ps-2 ps-sm-3" type="button" data-bs-toggle="dropdown">
-                                    <i class="fi-list me-2"></i><span class="dropdown-toggle-label">Todas as categorias</span>
+                                    <i class="fi-list me-2"></i>
+                                    <span class="dropdown-toggle-label">
+                                        {{ selectedCategory ? categories?.find(c => c.id === parseInt(selectedCategory))?.name : 'Todas as categorias' }}
+                                    </span>
                                 </button>
-                                <input type="hidden" />
+                                <input type="hidden" v-model="selectedCategory" />
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-bed fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Alojamento</span>
+                                        <a class="dropdown-item" href="javascript:void(0);" @click="selectedCategory = ''">
+                                            <i class="fi-list fs-lg opacity-60 me-2"></i>
+                                            <span class="dropdown-item-label">Todas as categorias</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-cafe fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Comida &amp; Bebida</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-shopping-bag fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Compras</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-museum fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Arte &amp; História</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-entertainment fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Entretenimento</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-meds fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Medicina</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-makeup fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Beleza</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="javascript:void(0);">
-                                            <i class="fi-car fs-lg opacity-60 me-2"></i><span class="dropdown-item-label">Aluguer de Carros</span>
+                                    <li v-for="category in categories" :key="category.id">
+                                        <a class="dropdown-item" href="javascript:void(0);" @click="selectedCategory = category.id.toString()">
+                                            <i :class="getCategoryIcon(category.name) + ' fs-lg opacity-60 me-2'"></i>
+                                            <span class="dropdown-item-label">{{ category.name }}</span>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
-                            <button class="btn btn-primary btn-lg rounded-pill w-100 w-md-auto ms-sm-3" type="button">
+                            <button class="btn btn-primary btn-lg rounded-pill w-100 w-md-auto ms-sm-3" type="submit">
                                 Procurar
                             </button>
                         </div>

@@ -1,6 +1,5 @@
 import { useValidatedBody, z } from 'h3-zod'
-import { tables } from '~/server/utils/drizzle'
-import { useDrizzle } from '~/server/utils/drizzle'
+import { useDrizzle, tables } from '~/server/utils/drizzle'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {

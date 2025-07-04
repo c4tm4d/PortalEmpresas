@@ -1,151 +1,89 @@
+<script lang="ts" setup>
+// Fetch businesses from API
+const { data: businesses, pending } = await useFetch('/api/businesses/public');
+
+// Filter for food & drink businesses (assuming category name contains "Food" or "Drink")
+const foodBusinesses = computed(() => {
+    if (!businesses.value) return [];
+    return businesses.value
+        .filter(business => {
+            const categoryName = business.category?.name?.toLowerCase() || '';
+            const categorySlug = business.category?.slug?.toLowerCase() || '';
+            
+            return categoryName.includes('comida') || 
+                   categoryName.includes('bebida') ||
+                   categoryName.includes('restaurante') ||
+                   categoryName.includes('food') || 
+                   categoryName.includes('drink') ||
+                   categoryName.includes('cafe') ||
+                   categorySlug.includes('food') ||
+                   categorySlug.includes('restaurant');
+        })
+        .slice(0, 6); // Show max 6 businesses
+});
+
+// Split businesses into two columns
+const leftColumnBusinesses = computed(() => foodBusinesses.value.slice(0, 3));
+const rightColumnBusinesses = computed(() => foodBusinesses.value.slice(3, 6));
+</script>
+
 <template>
     <!-- Banner + Where to eat-->
     <div class="container mb-5 pb-lg-4">
         <div class="row">
             <!-- Banner-->
-            <div class="col-lg-4 text-center text-lg-start mb-lg-0 mb-5">
-                <a class="d-block text-decoration-none bg-faded-accent rounded-3 h-100" href="javascript:void(0);">
-                    <div class="p-4">
-                        <h2 class="mb-0 p-2 text-primary text-nowrap">
-                            <i class="fi-phone mt-n1 me-2 pe-1 fs-3 align-middle"></i>Táxi<span class="text-dark">&nbsp;488</span>
-                        </h2>
-                        <p class="mb-0 p-2 fs-lg text-body">A melhor forma de chegar onde queres ir!</p>
-                    </div>
-                    <img src="@/assets/img/city-guide/illustrations/taxi.svg" alt="Ilustração" />
-                </a>
-            </div>
+            
             <!-- Where to eat-->
-            <div class="col-lg-8">
+            <div class="col-lg-12">
                 <div class="d-flex align-items-center justify-content-between mb-4 pb-2">
                     <h2 class="h3 mb-0">Onde comer</h2>
                     <nuxt-link class="btn btn-link fw-normal p-0" to="/catalog">Ver tudo<i class="fi-arrow-long-right ms-2"></i></nuxt-link>
                 </div>
-                <div class="row">
+                
+                <div v-if="pending" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <div v-else-if="foodBusinesses.length === 0" class="text-center py-4">
+                    <p class="text-muted">Nenhum restaurante disponível no momento.</p>
+                </div>
+                
+                <div v-else class="row">
                     <div class="col-sm-6">
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative mb-4">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/01.svg" alt="Logo da marca" />
+                        <!-- Left column items -->
+                        <div v-for="business in leftColumnBusinesses" :key="business.id" class="d-flex align-items-start position-relative mb-4">
+                            <img class="flex-shrink-0 me-3 rounded-3" :src="business.logo || '/placeholder.png'" alt="Logo da marca" style="width: 60px; height: 60px; object-fit: cover;" />
                             <div>
                                 <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">Restaurante Pina Pizza</nuxt-link>
+                                    <nuxt-link class="nav-link stretched-link" :to="`/catalog/single?id=${business.id}`">{{ business.name }}</nuxt-link>
                                 </h3>
                                 <ul class="list-unstyled mb-0 fs-xs">
                                     <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(48)</span>
+                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.address }}
                                     </li>
                                     <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.4 km do
-                                        centro
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative mb-4">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/02.svg" alt="Logo da marca" />
-                            <div>
-                                <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">KFC</nuxt-link>
-                                </h3>
-                                <ul class="list-unstyled mb-0 fs-xs">
-                                    <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>4.0</b><span class="text-muted">&nbsp;(18)</span>
-                                    </li>
-                                    <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.8 km do
-                                        centro
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative mb-4">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/03.svg" alt="Logo da marca" />
-                            <div>
-                                <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">Restaurante Yum</nuxt-link>
-                                </h3>
-                                <ul class="list-unstyled mb-0 fs-xs">
-                                    <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>4.6</b><span class="text-muted">&nbsp;(48)</span>
-                                    </li>
-                                    <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>2.4 km do
-                                        centro
+                                        <i class="fi-list mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.category?.name }}
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative mb-4">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/04.svg" alt="Logo da marca" />
+                        <!-- Right column items -->
+                        <div v-for="business in rightColumnBusinesses" :key="business.id" class="d-flex align-items-start position-relative mb-4">
+                            <img class="flex-shrink-0 me-3 rounded-3" :src="business.logo || '/placeholder.png'" alt="Logo da marca" style="width: 60px; height: 60px; object-fit: cover;" />
                             <div>
                                 <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">Bar de Sushi Tosaka</nuxt-link>
+                                    <nuxt-link class="nav-link stretched-link" :to="`/catalog/single?id=${business.id}`">{{ business.name }}</nuxt-link>
                                 </h3>
                                 <ul class="list-unstyled mb-0 fs-xs">
                                     <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(28)</span>
+                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.address }}
                                     </li>
                                     <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>2.5 km do
-                                        centro
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative mb-4">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/05.svg" alt="Logo da marca" />
-                            <div>
-                                <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">Dunkin' Donuts</nuxt-link>
-                                </h3>
-                                <ul class="list-unstyled mb-0 fs-xs">
-                                    <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(43)</span>
-                                    </li>
-                                    <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>1.8 km do
-                                        centro
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- Item-->
-                        <div class="d-flex align-items-start position-relative">
-                            <img class="flex-shrink-0 me-3 rounded-3" src="@/assets/img/city-guide/brands/06.svg" alt="Logo da marca" />
-                            <div>
-                                <h3 class="mb-2 fs-lg">
-                                    <nuxt-link class="nav-link stretched-link" to="/catalog/single">Bar-Restaurante Picante</nuxt-link>
-                                </h3>
-                                <ul class="list-unstyled mb-0 fs-xs">
-                                    <li>
-                                        <i class="fi-star-filled mt-n1 me-1 fs-base text-warning align-middle"></i><b>5.0</b><span class="text-muted">&nbsp;(32)</span>
-                                    </li>
-                                    <li>
-                                        <i class="fi-credit-card mt-n1 me-1 fs-base text-muted align-middle"></i>$$$
-                                    </li>
-                                    <li>
-                                        <i class="fi-map-pin mt-n1 me-1 fs-base text-muted align-middle"></i>0.4 km do
-                                        centro
+                                        <i class="fi-list mt-n1 me-1 fs-base text-muted align-middle"></i>{{ business.category?.name }}
                                     </li>
                                 </ul>
                             </div>

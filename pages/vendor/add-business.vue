@@ -35,12 +35,12 @@ const uploadedLogoFiles = ref<any[]>([]);
 
 // Form data
 const formData = ref({
-  name: 'Berlin Business Hotel',
+  name: '',
   description: '',
-  address: 'Pasewalker Str. 97',
-  district: 'Berlin-Mitte',
-  city: 'Berlin',
-  zipCode: '13127',
+  address: '',
+  district: '',
+  city: '',
+  zipCode: '',
   email: '',
   phone: '',
   website: '',
@@ -49,9 +49,9 @@ const formData = ref({
   twitter: '',
   instagram: '',
   linkedin: '',
-  categoryId: 1, // Default to Accommodation
-  latitude: 40.7447,
-  longitude: -73.9485
+  categoryId: 0, // No default category selected
+  latitude: 38.7223, // Lisbon coordinates as default
+  longitude: -9.1393
 });
 
 // Process files for API submission
@@ -114,25 +114,70 @@ const isSubmitting = ref(false);
 const submitError = ref('');
 const submitSuccess = ref(false);
 
+// Content filled calculation
+const calculateContentFilled = () => {
+  const requiredFields = [
+    formData.value.name,
+    formData.value.description,
+    formData.value.address,
+    formData.value.district,
+    formData.value.city,
+    formData.value.zipCode,
+    formData.value.email,
+    formData.value.phone,
+    formData.value.categoryId
+  ];
+  
+  const optionalFields = [
+    formData.value.website,
+    formData.value.facebook,
+    formData.value.foursquare,
+    formData.value.twitter,
+    formData.value.instagram,
+    formData.value.linkedin
+  ];
+  
+  // Count filled required fields (weight: 70%)
+  const filledRequired = requiredFields.filter(field => {
+    if (field === formData.value.categoryId) {
+      return field && field > 0; // Category must be selected (not 0)
+    }
+    return field && field.toString().trim().length > 0;
+  }).length;
+  const requiredScore = (filledRequired / requiredFields.length) * 70;
+  
+  // Count filled optional fields (weight: 20%)
+  const filledOptional = optionalFields.filter(field => 
+    field && field.toString().trim().length > 0
+  ).length;
+  const optionalScore = (filledOptional / optionalFields.length) * 20;
+  
+  // Check if files are uploaded (weight: 10%)
+  const hasLogo = logoFiles.value.length > 0;
+  const hasGallery = files.value.length > 0;
+  const fileScore = ((hasLogo ? 1 : 0) + (hasGallery ? 1 : 0)) / 2 * 10;
+  
+  const totalScore = Math.round(requiredScore + optionalScore + fileScore);
+  return Math.min(totalScore, 100);
+};
+
+// Computed content filled percentage
+const contentFilledPercentage = computed(() => calculateContentFilled());
+
+// Computed progress bar color based on percentage
+const progressBarColor = computed(() => {
+  const percentage = contentFilledPercentage.value;
+  if (percentage < 30) return 'bg-danger';
+  if (percentage < 60) return 'bg-warning';
+  if (percentage < 90) return 'bg-info';
+  return 'bg-success';
+});
+
 // Categories from API
 const categories = ref<Array<{id: number, name: string, icon: string | null, slug: string}>>([]);
 const isLoadingCategories = ref(true);
 
-// Cities and districts
-const cities = [
-  { name: 'Berlin', districts: ['Berlin-Mitte', 'Charlottenburg', 'Prenzlauer Berg', 'Friedrichshain', 'Kreuzberg'] },
-  { name: 'Hamburg', districts: ['Hamburg-Mitte', 'Altona', 'Eimsbüttel', 'Hamburg-Nord', 'Wandsbek'] },
-  { name: 'Munich', districts: ['Altstadt', 'Maxvorstadt', 'Schwabing', 'Haidhausen', 'Au-Haidhausen'] },
-  { name: 'Frankfurt am Main', districts: ['Innenstadt', 'Sachsenhausen', 'Bornheim', 'Bockenheim', 'Nordend'] },
-  { name: 'Stuttgart', districts: ['Mitte', 'Bad Cannstatt', 'Degerloch', 'Möhringen', 'Vaihingen'] },
-  { name: 'Cologne', districts: ['Innenstadt', 'Lindenthal', 'Ehrenfeld', 'Nippes', 'Chorweiler'] }
-];
-
-// Computed districts based on selected city
-const availableDistricts = computed(() => {
-  const selectedCity = cities.find(city => city.name === formData.value.city);
-  return selectedCity ? selectedCity.districts : [];
-});
+// Cities and districts - removed hardcoded data since we're using free input now
 
 // Computed properties for preview
 const logoPreviewUrl = computed(() => {
@@ -186,16 +231,16 @@ const fetchCategories = async () => {
     console.error('Error fetching categories:', error);
     // Fallback to hardcoded categories if API fails
     categories.value = [
-      { id: 1, name: 'Accommodation', icon: 'fi-bed', slug: '' },
-      { id: 2, name: 'Food & Drink', icon: 'fi-cafe', slug: '' },
-      { id: 3, name: 'Shopping', icon: 'fi-shopping-bag', slug: '' },
-      { id: 4, name: 'Art & History', icon: 'fi-museum', slug: '' },
-      { id: 5, name: 'Entertainment', icon: 'fi-entertainment', slug: '' },
-      { id: 6, name: 'Fitness & Sport', icon: 'fi-dumbell', slug: '' },
-      { id: 7, name: 'Night Life', icon: 'fi-disco-ball', slug: '' },
-      { id: 8, name: 'Medicine', icon: 'fi-meds', slug: '' },
-      { id: 9, name: 'Beauty', icon: 'fi-makeup', slug: '' },
-      { id: 10, name: 'Car Rental', icon: 'fi-car', slug: '' }
+      { id: 1, name: 'Alojamento', icon: 'fi-bed', slug: '' },
+      { id: 2, name: 'Restauração', icon: 'fi-cafe', slug: '' },
+      { id: 3, name: 'Comércio', icon: 'fi-shopping-bag', slug: '' },
+      { id: 4, name: 'Arte & Cultura', icon: 'fi-museum', slug: '' },
+      { id: 5, name: 'Entretenimento', icon: 'fi-entertainment', slug: '' },
+      { id: 6, name: 'Desporto & Fitness', icon: 'fi-dumbell', slug: '' },
+      { id: 7, name: 'Vida Noturna', icon: 'fi-disco-ball', slug: '' },
+      { id: 8, name: 'Saúde', icon: 'fi-meds', slug: '' },
+      { id: 9, name: 'Beleza', icon: 'fi-makeup', slug: '' },
+      { id: 10, name: 'Aluguer de Viaturas', icon: 'fi-car', slug: '' }
     ];
   } finally {
     isLoadingCategories.value = false;
@@ -206,19 +251,19 @@ const fetchCategories = async () => {
 const validateForm = () => {
   const errors = [];
   
-  if (!formData.value.name.trim()) errors.push('Business name is required');
-  if (!formData.value.description.trim()) errors.push('Description is required');
-  if (!formData.value.address.trim()) errors.push('Address is required');
-  if (!formData.value.district.trim()) errors.push('District is required');
-  if (!formData.value.city.trim()) errors.push('City is required');
-  if (!formData.value.zipCode.trim()) errors.push('Zip code is required');
-  if (!formData.value.email.trim()) errors.push('Email is required');
-  if (!formData.value.phone.trim()) errors.push('Phone is required');
+  if (!formData.value.name.trim()) errors.push('Nome do negócio é obrigatório');
+  if (!formData.value.description.trim()) errors.push('Descrição é obrigatória');
+  if (!formData.value.address.trim()) errors.push('Morada é obrigatória');
+  if (!formData.value.district.trim()) errors.push('Freguesia é obrigatória');
+  if (!formData.value.city.trim()) errors.push('Cidade é obrigatória');
+  if (!formData.value.zipCode.trim()) errors.push('Código Postal é obrigatório');
+  if (!formData.value.email.trim()) errors.push('Email é obrigatório');
+  if (!formData.value.phone.trim()) errors.push('Telemóvel é obrigatório');
   
   // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (formData.value.email && !emailRegex.test(formData.value.email)) {
-    errors.push('Invalid email format');
+    errors.push('Formato de email inválido');
   }
   
   return errors;
@@ -273,7 +318,7 @@ const handleSubmit = async () => {
       const validationErrors = error.data.data.map((err: any) => err.message).join(', ');
       submitError.value = `Validation errors: ${validationErrors}`;
     } else {
-      submitError.value = error.data?.message || 'Failed to create business. Please try again.';
+      submitError.value = error.data?.message || 'Falha ao criar negócio. Por favor, tente novamente.';
     }
   } finally {
     isSubmitting.value = false;
@@ -285,11 +330,7 @@ const selectCategory = (categoryId: number) => {
   formData.value.categoryId = categoryId;
 };
 
-// Handle city change
-const handleCityChange = () => {
-  // Reset district when city changes
-  formData.value.district = '';
-};
+
 
 // FilePond event handlers
 const handleLogoFileAdd = (error: any, file: any) => {
@@ -356,7 +397,7 @@ watch(uploadedFiles, (newFiles) => {
 
 const breadcrumbData = ref([
     {
-        title: 'Home',
+        title: 'Início',
         link: '/',
         subitems: [
             {
@@ -377,8 +418,8 @@ definePageMeta({
         <div class="modal-dialog modal-fullscreen" role="document">
             <div class="modal-content">
                 <div class="modal-header d-block justify-content-between d-sm-flex">
-                    <h3 class="h5 text-muted fw-normal modal-title d-none d-sm-block">Business preview</h3>
-                    <div class="d-flex align-items-center"><button class="btn btn-primary btn-sm me-4" @click="handleSubmit" :disabled="isSubmitting"><span v-if="isSubmitting">Saving...</span><span v-else>Save and continue</span></button><span class="fs-xs text-muted ms-auto me-2">[ESC]</span>
+                    <h3 class="h5 text-muted fw-normal modal-title d-none d-sm-block">Visualização do negócio</h3>
+                    <div class="d-flex align-items-center"><button class="btn btn-primary btn-sm me-4" @click="handleSubmit" :disabled="isSubmitting"><span v-if="isSubmitting">A guardar...</span><span v-else>Guardar e continuar</span></button><span class="fs-xs text-muted ms-auto me-2">[ESC]</span>
                         <button class="btn-close ms-0" type="button" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
@@ -410,7 +451,7 @@ definePageMeta({
                             <div class="col-md-7 mb-md-0 mb-4">
                                 <!-- About-->
                                 <div class="mb-4 pb-md-3">
-                                    <h3 class="h4">About</h3>
+                                    <h3 class="h4">Sobre</h3>
                                     <p class="mb-1">{{ formData.description }}</p>
                                 </div>
                             </div>
@@ -436,7 +477,7 @@ definePageMeta({
                                         </div>
                                         <!-- Place contacts-->
                                         <div class="mb-3 pb-3 border-bottom">
-                                            <h4 class="h5 mb-2">Contacts:</h4>
+                                            <h4 class="h5 mb-2">Contatos:</h4>
                                             <ul class="nav flex-column">
                                                 <li class="nav-item mb-2"><a class="nav-link p-0 fw-normal d-flex align-items-start" href="#"><i class="fi-map-pin mt-1 me-2 align-middle opacity-70"></i>{{ fullAddress }}</a></li>
                                                 <li v-if="formData.phone" class="nav-item mb-2"><a class="nav-link d-inline-block p-0 fw-normal d-inline-flex align-items-start" :href="`tel:${formData.phone}`"><i class="fi-phone mt-1 me-2 align-middle opacity-70"></i>{{ formData.phone }}</a></li>
@@ -447,7 +488,7 @@ definePageMeta({
 
                                         <!-- Follow-->
                                         <div class="d-flex align-items-center" v-if="formData.facebook || formData.instagram || formData.twitter">
-                                            <h4 class="h5 mb-0 me-3">Follow:</h4>
+                                            <h4 class="h5 mb-0 me-3">Seguir:</h4>
                                             <div class="text-nowrap">
                                                 <a v-if="formData.facebook" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" :href="formData.facebook" target="_blank"><i class="fi-facebook"></i></a>
                                                 <a v-if="formData.instagram" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" :href="formData.instagram" target="_blank"><i class="fi-instagram"></i></a>
@@ -473,17 +514,17 @@ definePageMeta({
 
                 <!-- Title-->
                 <div class="mb-4">
-                    <h1 class="h2 mb-0">Add business</h1>
-                    <div class="d-lg-none pt-3 mb-2">33% content filled</div>
+                    <h1 class="h2 mb-0">Adicionar Negócio</h1>
+                    <div class="d-lg-none pt-3 mb-2">{{ contentFilledPercentage }}% do conteúdo preenchido</div>
                     <div class="progress d-lg-none mb-4" style="height: 0.25rem">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" :class="progressBarColor" role="progressbar" :style="`width: ${contentFilledPercentage}%`" :aria-valuenow="contentFilledPercentage" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
 
                 <!-- Basic info-->
                 <section class="card card-body border-0 shadow-sm p-4 mb-4" id="basic-info">
                     <h2 class="h4 mb-4">
-                        <i class="fi-info-circle text-primary fs-5 mt-n1 me-2"></i>Basic info
+                        <i class="fi-info-circle text-primary fs-5 mt-n1 me-2"></i>Informações Básicas
                     </h2>
                     
                     <!-- Error/Success Messages -->
@@ -491,26 +532,26 @@ definePageMeta({
                         <i class="fi-alert-circle me-2"></i>{{ submitError }}
                     </div>
                     <div v-if="submitSuccess" class="alert alert-success mb-4" role="alert">
-                        <i class="fi-check-circle me-2"></i>Business created successfully! Redirecting...
+                        <i class="fi-check-circle me-2"></i>Negócio criado com sucesso! A redirecionar...
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label" for="ab-title">Official business name <span class="text-danger">*</span></label>
+                        <label class="form-label" for="ab-title">Nome oficial do negócio <span class="text-danger">*</span></label>
                         <input 
                             class="form-control" 
                             type="text" 
                             id="ab-title" 
                             v-model="formData.name"
-                            placeholder="Title for your business" 
+                            placeholder="Nome do seu negócio" 
                             required 
                         />
-                        <span class="form-text">{{ 48 - formData.name.length }} characters left</span>
+                        <span class="form-text">{{ 48 - formData.name.length }} caracteres restantes</span>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        <label class="form-label">Categoria <span class="text-danger">*</span></label>
                         <div class="btn-group d-block dropdown" data-bs-toggle="select">
                             <button class="btn btn-outline-secondary col-md-6 col-12 d-flex align-items-center justify-content-between ps-3 fw-normal dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="dropdown-toggle-label">{{ categories.find(c => c.id === formData.categoryId)?.name || 'Select Category' }}</span>
+                                <span class="dropdown-toggle-label">{{ categories.find(c => c.id === formData.categoryId)?.name || 'Selecionar Categoria' }}</span>
                             </button>
                             <input type="hidden" v-model="formData.categoryId" />
                             <div class="dropdown-menu w-100 my-1 p-3">
@@ -534,59 +575,56 @@ definePageMeta({
                 </section>
                 <!-- Location-->
                 <section class="card card-body border-0 shadow-sm p-4 mb-4" id="location">
-                    <h2 class="h4 mb-4"><i class="fi-map-pin text-primary fs-5 mt-n1 me-2"></i>Location</h2>
+                    <h2 class="h4 mb-4"><i class="fi-map-pin text-primary fs-5 mt-n1 me-2"></i>Localização</h2>
                     <div class="row">
-                        
                         <div class="col-sm-6 mb-3">
-                            <label class="form-label" for="ab-city">City <span class="text-danger">*</span></label>
-                            <select 
-                                class="form-select" 
+                            <label class="form-label" for="ab-city">Cidade <span class="text-danger">*</span></label>
+                            <input 
+                                class="form-control" 
+                                type="text" 
                                 id="ab-city" 
                                 v-model="formData.city"
-                                @change="handleCityChange"
-                                required
-                            >
-                                <option value="" disabled>Choose city</option>
-                                <option v-for="city in cities" :key="city.name" :value="city.name">{{ city.name }}</option>
-                            </select>
+                                placeholder="Digite o nome da cidade" 
+                                required 
+                            />
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label" for="ab-district">Freguesia <span class="text-danger">*</span></label>
+                            <input 
+                                class="form-control" 
+                                type="text" 
+                                id="ab-district" 
+                                v-model="formData.district"
+                                placeholder="Digite o nome da freguesia" 
+                                required 
+                            />
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-8 mb-3">
-                            <label class="form-label" for="ab-district">District <span class="text-danger">*</span></label>
-                            <select 
-                                class="form-select" 
-                                id="ab-district" 
-                                v-model="formData.district"
-                                required
-                            >
-                                <option value="" disabled>Choose district</option>
-                                <option v-for="district in availableDistricts" :key="district" :value="district">{{ district }}</option>
-                            </select>
-                        </div>
                         <div class="col-sm-4 mb-3">
-                            <label class="form-label" for="ab-zip">Zip code <span class="text-danger">*</span></label>
+                            <label class="form-label" for="ab-zip">Código Postal <span class="text-danger">*</span></label>
                             <input 
                                 class="form-control" 
                                 type="text" 
                                 id="ab-zip" 
                                 v-model="formData.zipCode"
-                                placeholder="Enter Zip code" 
+                                placeholder="Digite o Código Postal" 
                                 required 
                             />
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label" for="ab-address">Street address <span class="text-danger">*</span></label>
+                        <label class="form-label" for="ab-address">Morada <span class="text-danger">*</span></label>
                         <input 
                             class="form-control" 
                             type="text" 
                             id="ab-address" 
                             v-model="formData.address"
+                            placeholder="Digite a morada completa"
                             required 
                         />
                     </div>
-                    <div class="form-label fw-bold pt-3 pb-2">Display on the map</div>
+                    <div class="form-label fw-bold pt-3 pb-2">Exibir no mapa</div>
                     <div class="interactive-map rounded-3" style="height: 250px">
                         <l-map ref="map" :zoom="zoom" :center="[formData.latitude, formData.longitude]" :use-global-leaflet="false">
                             <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" layer-type="base" name="OpenStreetMap"></l-tile-layer>
@@ -595,7 +633,7 @@ definePageMeta({
                 </section>
                 <!-- Contacts-->
                 <section class="card card-body border-0 shadow-sm p-4 mb-4" id="contacts">
-                    <h2 class="h4 mb-4"><i class="fi-phone text-primary fs-5 mt-n1 me-2"></i>Contacts</h2>
+                    <h2 class="h4 mb-4"><i class="fi-phone text-primary fs-5 mt-n1 me-2"></i>Contatos</h2>
                     <div class="row">
                         <div class="col-sm-6 mb-3">
                             <label class="form-label" for="ab-email">Email <span class="text-danger">*</span></label>
@@ -604,33 +642,33 @@ definePageMeta({
                                 type="email" 
                                 id="ab-email" 
                                 v-model="formData.email"
-                                placeholder="Enter email" 
+                                placeholder="Digite o email" 
                                 required 
                             />
                         </div>
                         <div class="col-sm-6 mb-3">
-                            <label class="form-label" for="ab-phone">Phone <span class="text-danger">*</span></label>
+                            <label class="form-label" for="ab-phone">Telemóvel <span class="text-danger">*</span></label>
                             <input 
                                 class="form-control" 
                                 type="tel" 
                                 id="ab-phone" 
                                 v-model="formData.phone"
-                                placeholder="Enter phone number" 
+                                placeholder="Digite o número de telemóvel" 
                                 required 
                             />
                         </div>
                         <div class="col-12 mb-3 pb-3">
-                            <label class="form-label" for="ab-site">Website</label>
+                            <label class="form-label" for="ab-site">Sítio Web</label>
                             <input 
                                 class="form-control" 
                                 type="url" 
                                 id="ab-site" 
                                 v-model="formData.website"
-                                placeholder="Enter your website" 
+                                placeholder="Digite o seu sítio web" 
                             />
                         </div>
                         <div class="col-12">
-                            <label class="form-label mb-3 fw-bold">Socials</label>
+                            <label class="form-label mb-3 fw-bold">Redes Sociais</label>
                             <div class="d-flex align-items-center mb-3">
                                 <div class="btn btn-icon btn-light btn-xs shadow-sm rounded-circle pe-none flex-shrink-0 me-3">
                                     <i class="fi-facebook text-body"></i>
@@ -639,7 +677,7 @@ definePageMeta({
                                     class="form-control" 
                                     type="text" 
                                     v-model="formData.facebook"
-                                    placeholder="Your Facebook account" 
+                                    placeholder="A sua conta do Facebook" 
                                 />
                             </div>
                             <div class="d-flex align-items-center mb-3">
@@ -650,7 +688,7 @@ definePageMeta({
                                     class="form-control" 
                                     type="text" 
                                     v-model="formData.foursquare"
-                                    placeholder="Your Foursquare account" 
+                                    placeholder="A sua conta do Foursquare" 
                                 />
                             </div>
                             <div class="d-flex align-items-center mb-3">
@@ -661,7 +699,7 @@ definePageMeta({
                                     class="form-control" 
                                     type="text" 
                                     v-model="formData.twitter"
-                                    placeholder="Your Twitter account" 
+                                    placeholder="A sua conta do Twitter" 
                                 />
                             </div>
                             <div class="collapse" id="showMoreSocials">
@@ -673,7 +711,7 @@ definePageMeta({
                                         class="form-control" 
                                         type="text" 
                                         v-model="formData.instagram"
-                                        placeholder="Your Instagram account" 
+                                        placeholder="A sua conta do Instagram" 
                                     />
                                 </div>
                                 <div class="d-flex align-items-center mb-3">
@@ -684,18 +722,18 @@ definePageMeta({
                                         class="form-control" 
                                         type="text" 
                                         v-model="formData.linkedin"
-                                        placeholder="Your LinkedIn account" 
+                                        placeholder="A sua conta do LinkedIn" 
                                     />
                                 </div>
                             </div>
-                            <a class="collapse-label collapsed d-inline-block fs-sm fw-bold text-decoration-none pt-2 mb-1" data-bs-target="#showMoreSocials" data-bs-toggle="collapse" data-bs-label-collapsed="Show more" data-bs-label-expanded="Show less" role="button" aria-expanded="false" aria-controls="showMoreSocials"><i class="fi-arrow-down me-2"></i></a>
+                            <a class="collapse-label collapsed d-inline-block fs-sm fw-bold text-decoration-none pt-2 mb-1" data-bs-target="#showMoreSocials" data-bs-toggle="collapse" data-bs-label-collapsed="Ver mais" data-bs-label-expanded="Ver menos" role="button" aria-expanded="false" aria-controls="showMoreSocials"><i class="fi-arrow-down me-2"></i></a>
                         </div>
                     </div>
                 </section>
                 <!-- Description-->
                 <section class="card card-body border-0 shadow-sm p-4 mb-4" id="description">
-                    <h2 class="h4 mb-4"><i class="fi-edit text-primary fs-5 mt-n1 me-2"></i>Description</h2>
-                    <label class="form-label" for="ab-description">Description <span class="text-danger">*</span></label>
+                    <h2 class="h4 mb-4"><i class="fi-edit text-primary fs-5 mt-n1 me-2"></i>Descrição</h2>
+                    <label class="form-label" for="ab-description">Descrição <span class="text-danger">*</span></label>
                     <div class="row mb-4">
                         <div class="col-md-9 mb-md-0 mb-3">
                             <textarea 
@@ -703,15 +741,15 @@ definePageMeta({
                                 id="ab-description" 
                                 rows="6" 
                                 v-model="formData.description"
-                                placeholder="Describe your accommodation"
+                                placeholder="Descreva o seu negócio"
                             ></textarea>
-                            <span class="form-text">{{ 8000 - formData.description.length }} characters left</span>
+                            <span class="form-text">{{ 8000 - formData.description.length }} caracteres restantes</span>
                         </div>
                         <div class="col-md-3">
                             <file-pond 
                                 class="file-uploader bg-secondary p-4 pb-5" 
                                 v-model="logoFiles" 
-                                labelIdle='<i class="d-inline-block fi-cloud-upload fs-2 text-muted mb-2 pt-4"></i><br><span>Upload logo</span>' 
+                                labelIdle='<i class="d-inline-block fi-cloud-upload fs-2 text-muted mb-2 pt-4"></i><br><span>Carregar logótipo</span>' 
                                 accepted-file-types="image/jpeg, image/jpg, image/png" 
                                 allowMultiple="false" 
                                 :maxFiles="1" 
@@ -730,21 +768,21 @@ definePageMeta({
                 <!-- Photos / video-->
                 <section class="card card-body border-0 shadow-sm p-4 mb-4" id="photos">
                     <h2 class="h4 mb-4">
-                        <i class="fi-image text-primary fs-5 mt-n1 me-2"></i>Photos / video
+                        <i class="fi-image text-primary fs-5 mt-n1 me-2"></i>Fotos / vídeo
                     </h2>
                     <div class="alert alert-info mb-4" role="alert">
                         <div class="d-flex">
                             <i class="fi-alert-circle me-2 me-sm-3"></i>
                             <p class="fs-sm mb-1">
-                                The maximum photo size is 8 MB. Formats: jpeg, jpg, png. Put the main picture
-                                first.<br />The maximum video size is 10 MB. Formats: mp4, mov.
+                                O tamanho máximo da foto é 8 MB. Formatos: jpeg, jpg, png. Coloque a foto principal
+                                primeiro.<br />O tamanho máximo do vídeo é 10 MB. Formatos: mp4, mov.
                             </p>
                         </div>
                     </div>
                     <file-pond 
                         class="file-uploader file-uploader-grid p-5 pb-3" 
                         v-model="files" 
-                        labelIdle='<div class="btn btn-primary rounded-pill  mb-3"><i class="fi-cloud-upload me-1"></i>Upload photos / video</div><div class="mb-4">or drag them in</div>' 
+                        labelIdle='<div class="btn btn-primary rounded-pill  mb-3"><i class="fi-cloud-upload me-1"></i>Carregar fotos / vídeo</div><div class="mb-4">ou arraste aqui</div>' 
                         accepted-file-types="image/jpeg, image/jpg, image/png" 
                         allowMultiple="true" 
                         :maxFiles="4" 
@@ -759,7 +797,7 @@ definePageMeta({
                 <!-- Action buttons -->
                 <section class="d-sm-flex justify-content-between pt-2">
                     <a class="btn btn-outline-primary btn-lg d-block rounded-pill mb-3 mb-sm-2" data-bs-target="#preview-modal" data-bs-toggle="modal">
-                        <i class="fi-eye-on ms-n1 me-2"></i>Preview
+                        <i class="fi-eye-on ms-n1 me-2"></i>Visualizar
                     </a>
                     <button 
                         class="btn btn-primary btn-lg d-block rounded-pill mb-2" 
@@ -767,10 +805,10 @@ definePageMeta({
                         :disabled="isSubmitting"
                     >
                         <span v-if="isSubmitting">
-                            <i class="fi-loader me-2"></i>Saving...
+                            <i class="fi-loader me-2"></i>A guardar...
                         </span>
                         <span v-else>
-                            Save and continue
+                            Guardar e continuar
                         </span>
                     </button>
                 </section>
@@ -778,34 +816,34 @@ definePageMeta({
             <!-- Progress of completion-->
             <aside class="col-lg-3 offset-lg-1 d-none d-lg-block">
                 <div class="sticky-top pt-5">
-                    <h6 class="pt-5 mt-3 mb-2">33% content filled</h6>
+                    <h6 class="pt-5 mt-3 mb-2">{{ contentFilledPercentage }}% do conteúdo preenchido</h6>
                     <div class="progress mb-4" style="height: 0.25rem">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar" :class="progressBarColor" role="progressbar" :style="`width: ${contentFilledPercentage}%`" :aria-valuenow="contentFilledPercentage" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     <ul class="list-unstyled">
                         <li class="d-flex align-items-center">
-                            <i class="fi-check text-primary me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#basic-info">Basic info</a>
+                            <i class="fi-check me-2" :class="formData.name.trim() && formData.categoryId > 0 ? 'text-primary' : 'text-muted'"></i>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#basic-info">Informações Básicas</a>
                         </li>
                         <li class="d-flex align-items-center">
-                            <i class="fi-check text-primary me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#location">Location</a>
+                            <i class="fi-check me-2" :class="formData.address.trim() && formData.district.trim() && formData.city.trim() && formData.zipCode.trim() ? 'text-primary' : 'text-muted'"></i>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#location">Localização</a>
                         </li>
                         <li class="d-flex align-items-center">
-                            <i class="fi-check text-muted me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#contacts">Contacts</a>
+                            <i class="fi-check me-2" :class="formData.email.trim() && formData.phone.trim() ? 'text-primary' : 'text-muted'"></i>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#contacts">Contatos</a>
                         </li>
                         <li class="d-flex align-items-center">
-                            <i class="fi-check text-muted me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#description">Description</a>
-                        </li>
-                        <li class="d-flex align-items-center">
-                            <i class="fi-check text-muted me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#price">Price range</a>
+                            <i class="fi-check me-2" :class="formData.description.trim() ? 'text-primary' : 'text-muted'"></i>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#description">Descrição</a>
                         </li>
                         <li class="d-flex align-items-center">
                             <i class="fi-check text-muted me-2"></i>
-                            <a class="nav-link fw-normal ps-1 p-0" href="#photos">Photos / video</a>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#price">Faixa de preço</a>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <i class="fi-check me-2" :class="(logoFiles.length > 0 || files.length > 0) ? 'text-primary' : 'text-muted'"></i>
+                            <a class="nav-link fw-normal ps-1 p-0" href="#photos">Fotos / vídeo</a>
                         </li>
                     </ul>
                 </div>

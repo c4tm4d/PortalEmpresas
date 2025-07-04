@@ -3,45 +3,68 @@ import Header from './common/header.vue';
 import RecentlyViewed from './common/recently-view.vue'
 
 definePageMeta({
-    title: 'Single Place - Info',
+    title: 'Business Info',
 });
+
+// Get business ID from query parameter
+const route = useRoute();
+const businessId = route.query.id;
+
+// Fetch business data
+const { data: business, pending, error } = await useFetch(`/api/businesses/public/${businessId}`);
+
+// Handle case when business is not found
+if (!business.value && !pending.value) {
+    throw createError({
+        statusCode: 404,
+        message: 'Business not found'
+    });
+}
+
+// Set dynamic page title
+useHead(() => ({
+    title: business.value?.name ? `${business.value.name} - Info` : 'Business Info'
+}));
 </script>
 
 <template>
     <!-- Page header-->
-   <Header isActive="single-info" />
+   <Header :title="business?.name" :subtitle="business?.category?.name" isActive="single-info" />
+
+    <!-- Loading state -->
+    <div v-if="pending" class="container py-5">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">Loading business details...</p>
+        </div>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="error" class="container py-5">
+        <div class="text-center">
+            <i class="fi-alert-circle display-4 text-danger mb-3"></i>
+            <h3>Error loading business</h3>
+            <p class="text-muted">Failed to load business details. Please try again.</p>
+        </div>
+    </div>
 
     <!-- Page content -->
-    <section class="container pb-5 mb-md-4">
+    <section v-else-if="business" class="container pb-5 mb-md-4">
         <div class="row">
             <!-- Left column-->
             <div class="col-md-7 mb-md-0 mb-4 pb-md-0 pb-2">
                 <h2 class="h4">About</h2>
                 <ul class="list-unstyled">
                     <li>
-                        <i class="fi-star-filled mt-n1 me-1 text-warning align-middle"></i><b>4.9 </b><span class="text-muted">(48 reviews)</span>
+                        <i class="fi-list mt-n1 me-1 text-primary align-middle"></i><b>{{ business.category?.name }}</b>
                     </li>
-                    <li><i class="fi-wallet mt-n1 me-1 align-middle opacity-70"></i>$456</li>
-                    <li><i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>1.4 km from center</li>
+                    <li><i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>{{ business.city }}, {{ business.district }}</li>
+                    <li v-if="business.website"><i class="fi-globe mt-n1 me-1 align-middle opacity-70"></i>{{ business.website }}</li>
                 </ul>
                 <div class="mb-4 pb-md-3">
-                    <p class="mb-1">
-                        Lorem tincidunt lectus vitae id vulputate diam quam. Imperdiet non scelerisque turpis
-                        sed etiam ultrices. Blandit mollis dignissim egestas consectetur porttitor. Vulputate
-                        dolor pretium, dignissim eu augue sit ut convallis. Lectus est, magna urna feugiat sed
-                        ultricies sed in lacinia. Fusce potenti sit id pharetra vel ornare. Vestibulum sed
-                        tellus ullamcorper arcu.
-                    </p>
-                    <div class="collapse" id="seeMoreAbout">
-                        <p class="mb-1">
-                            Asperiores eos molestias, aspernatur assumenda vel corporis ex, magni excepturi totam
-                            exercitationem quia inventore quod amet labore impedit quae distinctio? Officiis
-                            blanditiis consequatur alias, atque, sed est incidunt accusamus repudiandae tempora
-                            repellendus obcaecati delectus ducimus inventore tempore harum numquam autem eligendi
-                            culpa.
-                        </p>
-                    </div>
-                    <a class="collapse-label collapsed" data-bs-target="#seeMoreAbout" data-bs-toggle="collapse" data-bs-label-collapsed="Show more" data-bs-label-expanded="Show less" role="button" aria-expanded="false" aria-controls="seeMoreAbout"></a>
+                    <p class="mb-1">{{ business.description }}</p>
                 </div>
                 <!-- Amenities-->
                 <div class="mb-4 pb-md-3">
@@ -95,7 +118,7 @@ definePageMeta({
                 <ul class="list-unstyled">
                     <li class="d-flex align-items-center mb-2">
                         <img class="flex-shrink-0 me-2" src="@/assets/img/city-guide/single/awards/01.jpg" width="40" alt="Award logo" />
-                        <div>2020 Traveler’s Choice</div>
+                        <div>2020 Traveler's Choice</div>
                     </li>
                     <li class="d-flex align-items-center mb-2">
                         <img class="flex-shrink-0 me-2" src="@/assets/img/city-guide/single/awards/02.jpg" width="40" alt="Award logo" />
@@ -125,18 +148,15 @@ definePageMeta({
                     <div class="card-body">
                         <!-- Place info-->
                         <div class="d-flex align-items-start mb-3 pb-2 border-bottom">
-                            <img src="@/assets/img/city-guide/brands/hotel.svg" width="60" alt="Thumbnail" />
+                            <img :src="business.logo || '/placeholder.png'" width="60" alt="Business logo" />
                             <div class="ps-2 ms-1">
-                                <h3 class="h5 mb-2">Berlin Business Hotel</h3>
+                                <h3 class="h5 mb-2">{{ business.name }}</h3>
                                 <ul class="list-unstyled d-flex flex-wrap fs-sm">
                                     <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-star-filled mt-n1 me-1 text-warning align-middle opacity-70"></i><b>4.9 </b>(48)
+                                        <i class="fi-list mt-n1 me-1 text-primary align-middle opacity-70"></i>{{ business.category?.name }}
                                     </li>
                                     <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-wallet mt-n1 me-1 align-middle opacity-70"></i>$456s
-                                    </li>
-                                    <li class="me-2 mb-1 pe-1">
-                                        <i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>1.4 km from center
+                                        <i class="fi-map-pin mt-n1 me-1 align-middle opacity-70"></i>{{ business.city }}, {{ business.district }}
                                     </li>
                                 </ul>
                             </div>
@@ -146,47 +166,49 @@ definePageMeta({
                             <h4 class="h5 mb-2">Contacts:</h4>
                             <ul class="nav flex-column">
                                 <li class="nav-item mb-2">
-                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" href="javascript:void(0);"><i class="fi-map-pin mt-1 me-2 align-middle opacity-70"></i>Ollenhauer Str. 29,
-                                        10118, Berlin</a>
+                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" href="javascript:void(0);"><i class="fi-map-pin mt-1 me-2 align-middle opacity-70"></i>{{ business.address }}, {{ business.zipCode }}, {{ business.city }}</a>
                                 </li>
-                                <li class="nav-item mb-2">
-                                    <a class="nav-link d-inline-block p-0 fw-normal d-inline-flex align-items-start" href="tel:3025550107"><i class="fi-phone mt-1 me-2 align-middle opacity-70"></i>(302) 555-0107</a>,
-                                    <a class="nav-link d-inline-block p-0 fw-normal" href="tel:3025550208">(302) 555-0208</a>
+                                <li v-if="business.phone" class="nav-item mb-2">
+                                    <a class="nav-link d-inline-block p-0 fw-normal d-inline-flex align-items-start" :href="`tel:${business.phone}`"><i class="fi-phone mt-1 me-2 align-middle opacity-70"></i>{{ business.phone }}</a>
                                 </li>
-                                <li class="nav-item mb-2">
-                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" href="javascript:void(0);"><i class="fi-globe mt-1 me-2 align-middle opacity-60"></i>bb-hotel.com</a>
+                                <li v-if="business.website" class="nav-item mb-2">
+                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" :href="business.website" target="_blank"><i class="fi-globe mt-1 me-2 align-middle opacity-60"></i>{{ business.website }}</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" href="mailto:bb-hotel@example.com"><i class="fi-mail mt-1 me-2 align-middle opacity-70"></i>bb-hotel@example.com</a>
+                                <li v-if="business.email" class="nav-item">
+                                    <a class="nav-link p-0 fw-normal d-flex align-items-start" :href="`mailto:${business.email}`"><i class="fi-mail mt-1 me-2 align-middle opacity-70"></i>{{ business.email }}</a>
                                 </li>
                             </ul>
                         </div>
-                        <!-- Place pricing-->
+                        <!-- Business info -->
                         <div class="mb-3 pb-4 border-bottom">
                             <div class="row row-cols-1">
                                 <div class="col mb-3">
                                     <h4 class="h5 mb-0">
-                                        <span class="fs-4">$50-100&nbsp;</span><span class="fs-base fw-normal text-body">/night</span>
+                                        <span class="fs-4">{{ business.category?.name }}</span>
                                     </h4>
                                 </div>
                                 <div class="col">
-                                    <a class="btn btn-primary btn-lg rounded-pill w-sm-auto w-100" href="javascript:void(0);">Book now<i class="fi-chevron-right fs-sm ms-2"></i>
+                                    <a v-if="business.website" class="btn btn-primary btn-lg rounded-pill w-sm-auto w-100" :href="business.website" target="_blank">Visit Website<i class="fi-chevron-right fs-sm ms-2"></i>
                                     </a>
+                                    <span v-else class="text-muted">No website available</span>
                                 </div>
                             </div>
                         </div>
                         <!-- Place following-->
-                        <div class="d-flex align-items-center">
+                        <div v-if="business.facebook || business.instagram || business.twitter || business.linkedin" class="d-flex align-items-center">
                             <h4 class="h5 mb-0 me-3">Follow:</h4>
                             <div class="text-nowrap">
-                                <a class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" href="javascript:void(0);">
+                                <a v-if="business.facebook" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" :href="business.facebook" target="_blank">
                                     <i class="fi-facebook"></i>
                                 </a>
-                                <a class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" href="javascript:void(0);">
+                                <a v-if="business.instagram" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" :href="business.instagram" target="_blank">
                                     <i class="fi-instagram"></i>
                                 </a>
-                                <a class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle" href="javascript:void(0);">
+                                <a v-if="business.twitter" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle me-2" :href="business.twitter" target="_blank">
                                     <i class="fi-twitter"></i>
+                                </a>
+                                <a v-if="business.linkedin" class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle" :href="business.linkedin" target="_blank">
+                                    <i class="fi-linkedin"></i>
                                 </a>
                             </div>
                         </div>

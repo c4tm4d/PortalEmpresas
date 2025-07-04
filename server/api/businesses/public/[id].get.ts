@@ -1,16 +1,7 @@
 import { useDrizzle, tables } from '~/server/utils/drizzle'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-
-  if (!session.user) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized'
-    })
-  }
-
   const businessIdRaw = getRouterParam(event, 'id')
   let businessId = 0
   try {
@@ -50,7 +41,6 @@ export default defineEventHandler(async (event) => {
         linkedin: tables.businesses.linkedin,
         latitude: tables.businesses.latitude,
         longitude: tables.businesses.longitude,
-        categoryId: tables.businesses.categoryId,
         createdAt: tables.businesses.createdAt,
         updatedAt: tables.businesses.updatedAt,
         category: {
@@ -62,17 +52,14 @@ export default defineEventHandler(async (event) => {
       })
       .from(tables.businesses)
       .leftJoin(tables.categories, eq(tables.businesses.categoryId, tables.categories.id))
-      .where(and(
-        eq(tables.businesses.id, businessId),
-        eq(tables.businesses.userId, session.user.id)
-      ))
+      .where(eq(tables.businesses.id, businessId))
       .get()
 
     if (!business) {
-      return {
-        status: 'not_found',
-        message: 'Business not found or access denied'
-      }
+      throw createError({
+        statusCode: 404,
+        message: 'Business not found'
+      })
     }
 
     // Fetch photos for the business
@@ -86,8 +73,11 @@ export default defineEventHandler(async (event) => {
       ...business,
       photos
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching business:', error)
+    if (error.statusCode) {
+      throw error
+    }
     throw createError({
       statusCode: 500,
       message: 'Failed to fetch business'

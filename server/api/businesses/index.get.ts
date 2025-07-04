@@ -1,5 +1,4 @@
-import { tables } from '~/server/utils/drizzle'
-import { useDrizzle } from '~/server/utils/drizzle'
+import { useDrizzle, tables } from '~/server/utils/drizzle'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -13,8 +12,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Fetch businesses with category and photos
-    const businesses = await useDrizzle()
+    // Build the base query
+    const baseQuery = useDrizzle()
       .select({
         id: tables.businesses.id,
         name: tables.businesses.name,
@@ -45,8 +44,11 @@ export default defineEventHandler(async (event) => {
       })
       .from(tables.businesses)
       .leftJoin(tables.categories, eq(tables.businesses.categoryId, tables.categories.id))
-      .where(eq(tables.businesses.userId, session.user.id))
-      .all()
+
+    // If user is not admin, only show their own businesses
+    const businesses = session.user.role === 'admin' 
+      ? await baseQuery.all()
+      : await baseQuery.where(eq(tables.businesses.userId, session.user.id)).all()
 
     // Fetch photos for each business
     const businessesWithPhotos = await Promise.all(

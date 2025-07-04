@@ -6,18 +6,13 @@
         <div class="col-lg-3 col-md-6 col-sm-4">
           <div class="mb-4 pb-sm-3">
             <nuxt-link class="d-inline-block" to="/">
-              <img src="@/assets/img/logo/logo-light.svg" width="116" alt="Logo" />
+              <img src="@/assets/img/logo/logo-light.svg" width="150" alt="Portal Empresas" />
             </nuxt-link>
           </div>
           <ul class="nav nav-light flex-column">
             <li class="nav-item mb-2">
-              <a class="nav-link p-0 fw-normal text-light text-nowrap" href="mailto:example@gmail.com">
-                <i class="fi-mail mt-n1 me-1 align-middle text-primary"></i>example@gmail.com</a>
-            </li>
-            <li class="nav-item mb-2">
-              <a class="nav-link p-0 fw-normal text-light text-nowrap" href="tel:4065550120">
-                <i class="fi-device-mobile mt-n1 me-1 align-middle text-primary"></i>(406)
-                555-0120</a>
+              <a class="nav-link p-0 fw-normal text-light text-nowrap" href="mailto:geral@portal-empresas.pt">
+                <i class="fi-mail mt-n1 me-1 align-middle text-primary"></i>geral@portal-empresas.pt</a>
             </li>
           </ul>
         </div>
@@ -28,25 +23,14 @@
             <li><a class="nav-link-light" href="javascript:void(0);">Principais cidades</a></li>
             <li><a class="nav-link-light" href="javascript:void(0);">Alojamento</a></li>
             <li>
-              <a class="nav-link-light" href="javascript:void(0);">Cafés &amp; restaurantes</a>
+              <a class="nav-link-light" href="javascript:void(0);">Restauração</a>
             </li>
-            <li><a class="nav-link-light" href="javascript:void(0);">Eventos</a></li>
-          </ul>
-        </div>
-        <!-- Links-->
-        <div class="col-lg-2 col-md-3 col-sm-4">
-          <h3 class="fs-base text-light">Perfil</h3>
-          <ul class="list-unstyled fs-sm">
-            <li><a class="nav-link-light" href="javascript:void(0);">A minha conta</a></li>
-            <li><a class="nav-link-light" href="javascript:void(0);">Favoritos</a></li>
-            <li><a class="nav-link-light" href="javascript:void(0);">Os meus anúncios</a></li>
-            <li><a class="nav-link-light" href="javascript:void(0);">Adicionar anúncio</a></li>
           </ul>
         </div>
         <!-- Subscription form-->
         <div class="col-lg-4 offset-lg-1">
           <h3 class="h4 text-light">Subscreve à nossa newsletter</h3>
-          <p class="fs-sm mb-4 opacity-60">Não percas nenhuma vaga relevante!</p>
+          <p class="fs-sm mb-4 opacity-60">Não percas nenhuma oportunidade de negócio!</p>
           <form class="form-group form-group-light rounded-pill" style="max-width: 500px">
             <div class="input-group input-group-sm">
               <span class="input-group-text text-muted"><i class="fi-mail"></i></span>
@@ -61,51 +45,14 @@
       <div class="container d-flex flex-column flex-lg-row align-items-center justify-content-between py-2">
         <!-- Copyright-->
         <p class="order-lg-1 order-2 fs-sm mb-2 mb-lg-0">
-          <span class="text-light opacity-60">&copy; Todos os direitos reservados. Feito por </span><a class="nav-link-light fw-bold" href="#!"  rel="noopener">SRBThemes</a>
+          <span class="text-light opacity-60">&copy; 2024 Portal Empresas. Todos os direitos reservados.</span>
         </p>
         <div class="d-flex flex-lg-row flex-column align-items-center order-lg-2 order-1 ms-lg-4 mb-lg-0 mb-4">
           <!-- Links-->
-          <div class="d-flex flex-wrap fs-sm mb-lg-0 mb-4 pe-lg-4">
-            <a class="nav-link-light px-2 mx-1" href="javascript:void(0);">Sobre</a>
-            <a class="nav-link-light px-2 mx-1" href="javascript:void(0);">Blog</a>
-            <a class="nav-link-light px-2 mx-1" href="javascript:void(0);">Suporte</a>
-            <a class="nav-link-light px-2 mx-1" href="javascript:void(0);">Contactos</a>
-          </div>
+          
           <div class="d-flex align-items-center">
             <!-- Language switcher-->
-            <div class="dropdown">
-              <a class="nav-link nav-link-light dropdown-toggle fs-sm align-items-center p-0 fw-normal" href="javascript:void(0);" id="langSwitcher" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                <i class="fi-globe mt-n1 me-2 align-middle"></i>Port</a>
-              <ul class="dropdown-menu dropdown-menu-dark my-1" aria-labelledby="langSwitcher">
-                <li>
-                  <a class="dropdown-item text-nowrap py-1" href="javascript:void(0);">
-                    <img class="me-2" src="@/assets/img/flags/de.png" width="20" alt="Deutsch" />Deutsch</a>
-                </li>
-                <li>
-                  <a class="dropdown-item text-nowrap py-1" href="javascript:void(0);">
-                    <img class="me-2" src="@/assets/img/flags/fr.png" width="20" alt="Français" />Français</a>
-                </li>
-                <li>
-                  <a class="dropdown-item text-nowrap py-1" href="javascript:void(0);">
-                    <img class="me-2" src="@/assets/img/flags/es.png" width="20" alt="Español" />Español</a>
-                </li>
-              </ul>
-            </div>
-            <!-- Socials-->
-            <div class="ms-4 ps-lg-2 text-nowrap">
-              <a class="btn btn-icon btn-translucent-light btn-xs rounded-circle ms-2" href="javascript:void(0);">
-                <i class="fi-facebook"></i>
-              </a>
-              <a class="btn btn-icon btn-translucent-light btn-xs rounded-circle ms-2" href="javascript:void(0);">
-                <i class="fi-twitter"></i>
-              </a>
-              <a class="btn btn-icon btn-translucent-light btn-xs rounded-circle ms-2" href="javascript:void(0);">
-                <i class="fi-telegram"></i>
-              </a>
-              <a class="btn btn-icon btn-translucent-light btn-xs rounded-circle ms-2" href="javascript:void(0);">
-                <i class="fi-messenger"></i>
-              </a>
-            </div>
+           
           </div>
         </div>
       </div>

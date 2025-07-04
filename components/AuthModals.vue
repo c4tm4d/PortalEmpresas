@@ -201,10 +201,10 @@ const clearForms = () => {
             <div class="col-md-6 border-end-md p-4 p-sm-5">
               <h2 class="h3 mb-4 mb-sm-5">Hey there!<br />Welcome back.</h2>
               <img class="d-block mx-auto" src="@/assets/img/signin-modal/signin.svg" width="344" alt="Illustartion" />
-              <div class="mt-4 mt-sm-5">
+              <!-- <div class="mt-4 mt-sm-5">
                 Don't have an account?
                 <a class="text-primary" data-bs-target="#signup-modal" data-bs-toggle="modal" data-bs-dismiss="modal">Sign up here</a>
-              </div>
+              </div> -->
             </div>
             <div class="col-md-6 px-4 pt-2 pb-4 px-sm-5 pb-sm-5 pt-md-5">
               <!-- Error Message -->

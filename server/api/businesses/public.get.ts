@@ -1,36 +1,10 @@
 import { useDrizzle, tables } from '~/server/utils/drizzle'
-import { eq, and } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event)
-
-  if (!session.user) {
-    throw createError({
-      statusCode: 401,
-      message: 'Unauthorized'
-    })
-  }
-
-  const businessIdRaw = getRouterParam(event, 'id')
-  let businessId = 0
   try {
-    businessId = parseInt(businessIdRaw || '0')
-  } catch (e) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid business ID'
-    })
-  }
-  if (!businessId) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid business ID'
-    })
-  }
-
-  try {
-    // Fetch business with category
-    const business = await useDrizzle()
+    // Fetch all businesses with category
+    const businesses = await useDrizzle()
       .select({
         id: tables.businesses.id,
         name: tables.businesses.name,
@@ -50,7 +24,6 @@ export default defineEventHandler(async (event) => {
         linkedin: tables.businesses.linkedin,
         latitude: tables.businesses.latitude,
         longitude: tables.businesses.longitude,
-        categoryId: tables.businesses.categoryId,
         createdAt: tables.businesses.createdAt,
         updatedAt: tables.businesses.updatedAt,
         category: {
@@ -62,35 +35,30 @@ export default defineEventHandler(async (event) => {
       })
       .from(tables.businesses)
       .leftJoin(tables.categories, eq(tables.businesses.categoryId, tables.categories.id))
-      .where(and(
-        eq(tables.businesses.id, businessId),
-        eq(tables.businesses.userId, session.user.id)
-      ))
-      .get()
-
-    if (!business) {
-      return {
-        status: 'not_found',
-        message: 'Business not found or access denied'
-      }
-    }
-
-    // Fetch photos for the business
-    const photos = await useDrizzle()
-      .select()
-      .from(tables.businessPhotos)
-      .where(eq(tables.businessPhotos.businessId, businessId))
       .all()
 
-    return {
-      ...business,
-      photos
-    }
+    // Fetch photos for each business
+    const businessesWithPhotos = await Promise.all(
+      businesses.map(async (business) => {
+        const photos = await useDrizzle()
+          .select()
+          .from(tables.businessPhotos)
+          .where(eq(tables.businessPhotos.businessId, business.id))
+          .all()
+
+        return {
+          ...business,
+          photos
+        }
+      })
+    )
+
+    return businessesWithPhotos
   } catch (error) {
-    console.error('Error fetching business:', error)
+    console.error('Error fetching businesses:', error)
     throw createError({
       statusCode: 500,
-      message: 'Failed to fetch business'
+      message: 'Failed to fetch businesses'
     })
   }
 }) 

@@ -1,22 +1,24 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
-defineProps({
-    isActive: String
+const props = defineProps({
+    isActive: String,
+    title: String,
+    subtitle: String
 })
 
-const breadcrumbData = ref([
+const breadcrumbData = computed(() => [
     {
         title: 'Home',
         link: '/',
         subitems: [
             {
-                title: 'Find accommodation',
+                title: 'Encontrar Empresas',
                 link: '/catalog'
             },
             {
-                title: 'Berlin Business Hotel'
+                title: props.title || 'Business Details'
             }
         ]
     }
@@ -28,7 +30,10 @@ const breadcrumbData = ref([
         <Breadcrumb :data="breadcrumbData" />
 
         <div class="d-sm-flex align-items-center justify-content-between mb-4 pb-sm-2">
-            <h1 class="h2 me-3 mb-sm-0">Berlin Business Hotel</h1>
+            <div>
+                <h1 class="h2 me-3 mb-sm-0">{{ title || 'Business Details' }}</h1>
+                <p v-if="subtitle" class="text-muted mb-0">{{ subtitle }}</p>
+            </div>
             <div class="text-nowrap">
                 <button class="btn btn-icon btn-light-primary btn-xs shadow-sm rounded-circle" type="button" data-bs-toggle="tooltip" data-bs-title="Add to Favorites">
                     <i class="fi-heart"></i>
