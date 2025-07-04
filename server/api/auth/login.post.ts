@@ -65,15 +65,13 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Set session
+    // Set session - use simple structure
     const sessionData = {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar,
-        role: user.role
-      }
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+      role: user.role
     }
     
     console.log('Setting session with data:', JSON.stringify(sessionData)) // Debug log
@@ -83,24 +81,10 @@ export default defineEventHandler(async (event) => {
       console.log('Session set successfully') // Debug log
     } catch (sessionError) {
       console.error('Error setting session:', sessionError) // Debug log
-      // Try a different approach - set session without user object wrapper
-      try {
-        console.log('Trying alternative session format...') // Debug log
-        await setUserSession(event, {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          avatar: user.avatar,
-          role: user.role
-        })
-        console.log('Alternative session format successful') // Debug log
-      } catch (altSessionError) {
-        console.error('Alternative session format also failed:', altSessionError) // Debug log
-        throw createError({
-          statusCode: 500,
-          message: 'Failed to create session'
-        })
-      }
+      throw createError({
+        statusCode: 500,
+        message: 'Failed to create session'
+      })
     }
 
     console.log('Login successful for:', email) // Debug log

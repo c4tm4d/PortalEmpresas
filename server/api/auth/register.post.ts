@@ -46,13 +46,11 @@ export default defineEventHandler(async (event) => {
   // Set session
   try {
     await setUserSession(event, {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        avatar: user.avatar,
-        role: user.role
-      }
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatar: user.avatar,
+      role: user.role
     })
   } catch (sessionError) {
     console.error('Error setting session during registration:', sessionError)

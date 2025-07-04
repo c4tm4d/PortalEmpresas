@@ -14,25 +14,25 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    if (!session || !session.user) {
-      console.log('No user in session') // Debug log
+    if (!session) {
+      console.log('No session found') // Debug log
       throw createError({
         statusCode: 401,
         message: 'Unauthorized'
       })
     }
 
-    // Validate session user data
-    if (!session.user.id || !session.user.email) {
-      console.log('Invalid session user data:', session.user) // Debug log
+    // Validate session data
+    if (!session.id || !session.email) {
+      console.log('Invalid session data:', session) // Debug log
       throw createError({
         statusCode: 401,
         message: 'Invalid session data'
       })
     }
 
-    console.log('Returning user data:', JSON.stringify(session.user)) // Debug log
-    return session.user
+    console.log('Returning user data:', JSON.stringify(session)) // Debug log
+    return session
   } catch (error) {
     console.error('Error in /api/auth/me:', error) // Debug log
     if (error instanceof Error) {
