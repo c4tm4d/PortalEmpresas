@@ -32,7 +32,8 @@
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
 	 */
 	"vars": { 
-		"AUTH_SECRET": "M=;@>#G7aS[:`gDLJ`iaR#}1!&&!v-Q?"
+		"AUTH_SECRET": "M=;@>#G7aS[:`gDLJ`iaR#}1!&&!v-Q?",
+		"NUXT_PUBLIC_SITE_URL": "https://portal-empresas.pt"
 	},
 	/**
 	 * Note: Use secrets to store sensitive data.
