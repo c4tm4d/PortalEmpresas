@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "db:generate": "drizzle-kit generate",
     "db:generate:sqlite": "tsx dbml.ts",
-    "preview": "npx nuxthub preview",
+    "preview": "npx nuxt build && npx nuxthub preview",
     "deploy": "npx nuxthub deploy",
     "cf-typegen": "wrangler types && nuxt generate"
   },

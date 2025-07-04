@@ -70,6 +70,10 @@ export default defineNuxtConfig({
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "http://localhost:3000",
     },
+    // Private keys (only available on server-side)
+    auth: {
+      secret: process.env.AUTH_SECRET || 'your-secret-key-here'
+    }
   },
 
   modules: [
