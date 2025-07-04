@@ -32,4 +32,4 @@ jobs:
       - name: Build & Deploy to NuxtHub
         uses: nuxt-hub/action@v2
         with:
-          project-key: portal-empresas-62d5
+          project-key: portal-empresas-077m
